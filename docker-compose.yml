@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: arkivo_db
+    image: postgres:13
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+      - ./dockerConfig/postgres-dev-init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    ports:
+      - 5439:5432
+
+  redis:
+    container_name: arkivo_redis
+    image: redis:6-alpine
+    volumes:
+      - redis_volume:/data
+    ports:
+      - 6378:6379
+
+  ipfs:
+    container_name: arkivo_ipfs
+    restart: unless-stopped
+    image: ipfs/kubo
+    volumes:
+      - ipfs_path:/data/ipfs
+      - ipfs_fuse:/ipfs
+      - ipns_fuse:/ipns
+    environment:
+      - IPFS_PATH=/data/ipfs
+    ports:
+      # Swarm listens on all interfaces, so is remotely reachable.
+      - 4001:4001/tcp
+      - 4001:4001/udp
+      
+      # The following ports only listen on the loopback interface, so are not remotely reachable by default.
+      # If you want to override these or add more ports, see https://docs.docker.com/compose/extends/ .
+      
+      # API port, which includes admin operations, so you probably don't want this remotely accessible.
+      - 5001:5001
+      
+      # HTTP Gateway
+      - 8080:8080
+
+  app:
+    container_name: arkivo_app
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+      - ipfs
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+      target: dependencies
+    ports:
+      - ${PORT}:${PORT}
+      - 9229:9229
+    env_file:
+      - .env
+    environment:
+      - PG_HOST=postgres
+      - REDIS_HOST=redis
+    volumes:
+      - ./:/home/node/app
+    command: dumb-init node ace serve --watch --node-args="--inspect=0.0.0.0"
+
+  worker:
+    container_name: arkivo_worker
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    build:
+      context: .
+      dockerfile: ./docker/worker/Dockerfile
+      target: dependencies
+    env_file:
+      - .env
+    environment:
+      - PG_HOST=postgres
+      - REDIS_HOST=redis
+    volumes:
+      - ./:/home/node/app
+    command: dumb-init node ace queue:listen
+
+
+
+volumes:
+  db_volume:
+  redis_volume:
+  ipfs_path:
+  ipfs_fuse:
+  ipns_fuse:
