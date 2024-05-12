@@ -154,7 +154,7 @@ async function makeGraphQLRequest(query: string) {
     // alternative instance (Teia): https://teztok.teia.rocks/v1/graphql
     // const response = await axios.post('https://teztok.teia.rocks/v1/graphql', {
     // const response = await axios.post('https://graphiql.teztok.com/v1/graphql', {
-    const response = await axios.post('http://localhost:8080/v1/graphql', {
+    const response = await axios.post('http://192.168.1.33:8080/v1/graphql', {
       query: query,
     });
 

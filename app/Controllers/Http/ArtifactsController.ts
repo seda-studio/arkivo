@@ -1,9 +1,27 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Artifact from 'App/Models/Artifact'
 import Tag from 'App/Models/Tag'
+import Env from '@ioc:Adonis/Core/Env'
 import { Queue } from '@ioc:Rlanz/Queue';
 
 export default class ArtifactsController {
+
+    public async index({ view }: HttpContextContract) {
+        return view.render('artifacts')
+    }
+
+    public async show({ view, params }: HttpContextContract) {
+        // const artifact = await Artifact.query().where('id', params.id).preload('tags').firstOrFail()
+        const artifact = await (await Artifact.findOrFail(params.id));
+
+        const ipfsHost = Env.get('IPFS_HOST')
+
+            // Remove "ipfs://" prefix and any URI attributes
+            const cleanUri = artifact.artifactUri.replace('ipfs://', '').split('?')[0];
+            artifact.artifactUri = 'https://' + ipfsHost + '/ipfs/' + cleanUri;
+
+        return view.render('artifact', { artifact })
+    }
 
     public async store({}: HttpContextContract) {
         const artifact = new Artifact()
