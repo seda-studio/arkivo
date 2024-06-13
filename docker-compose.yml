@@ -14,7 +14,7 @@ services:
       - 5439:5432
 
   redis:
-    container_name: arkivo_redis
+    container_name: arkivo_red
     image: redis:6-alpine
     volumes:
       - redis_volume:/data

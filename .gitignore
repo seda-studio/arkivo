@@ -1,0 +1,12 @@
+node_modules
+build
+coverage
+.vscode
+.DS_STORE
+.env
+tmp
+TODO
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

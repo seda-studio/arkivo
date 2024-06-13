@@ -21,11 +21,24 @@
 import Route from '@ioc:Adonis/Core/Route'
 import Logger from '@ioc:Adonis/Core/Logger'
 
-Route.post('/artifacts/store', 'ArtifactsController.store').as('artifacts.store')
-
-Route.post('/artifacts/fetch', 'ArtifactsController.fetch').as('artifacts.fetch')
 
 Route.get('/', async ({ view }) => {
   Logger.info('##### accounts migration up: using PG_DB_NAME: ' + process.env.PG_DB_NAME)
   return view.render('welcome')
 })
+
+Route.group(() => { 
+
+  Route.get('/', 'ArtifactsController.index').as('index')
+
+  Route.get('/:id', 'ArtifactsController.show').as('show')
+
+  Route.post('/', 'ArtifactsController.store').as('store')
+
+  Route.post('/:id/edit', 'ArtifactsController.update').as('edit')
+
+  Route.put('fetch', 'ArtifactsController.fetch').as('fetch')
+
+  Route.delete('/:id', 'ArtifactsController.destroy').as('destroy')
+
+}).prefix('/artifacts').as('artifacts.')

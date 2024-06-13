@@ -32,12 +32,12 @@ function getQuery() {
 }
 
 
-export default class FetchArtifacts extends BaseCommand {
+export default class ArtifactsFetch extends BaseCommand {
 
   /**
    * Command name is used to run the command
    */
-  public static commandName = 'fetch:artifacts'
+  public static commandName = 'artifacts:fetch'
 
   @args.string({ description: 'Artifact platform' })
   public platform: string
@@ -86,9 +86,6 @@ export default class FetchArtifacts extends BaseCommand {
 
 
         for(const token of response.data.data.tokens) {
-          // this.logger.info('Processing token: ' + token.token_id);
-
-          this.logger.debug(token.artifact_uri);
 
           const artifactExists = await Artifact.query()
             .where('chain', 'tezos')
@@ -154,7 +151,7 @@ async function makeGraphQLRequest(query: string) {
     // alternative instance (Teia): https://teztok.teia.rocks/v1/graphql
     // const response = await axios.post('https://teztok.teia.rocks/v1/graphql', {
     // const response = await axios.post('https://graphiql.teztok.com/v1/graphql', {
-    const response = await axios.post('http://localhost:8080/v1/graphql', {
+    const response = await axios.post('http://192.168.1.33:8080/v1/graphql', {
       query: query,
     });
 

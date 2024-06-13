@@ -34,7 +34,7 @@ export default class ProcessArtifact implements JobHandlerContract {
         const metadataPinned = await pinIPFS(artifact.metadataUri)
 
         // 2. pin the artifact payload
-        const artifactPinned =await pinIPFS(artifact.artifactUri)
+        const artifactPinned = await pinIPFS(artifact.artifactUri)
 
         artifact.isFetched = (metadataPinned && artifactPinned)
         artifact.isPinned = (metadataPinned && artifactPinned)
@@ -52,14 +52,19 @@ export default class ProcessArtifact implements JobHandlerContract {
 async function pinIPFS(uri: string): Promise<boolean> {
   const ipfsHost = Env.get('IPFS_HOST')
   const ipfsPort = Env.get('IPFS_PORT')
+  const timeout = 30000; // Set timeout duration in milliseconds (30000ms = 30 seconds)
 
   try {
+
+    console.log(`Attempting to pin IPFS URI: ${uri}`);
 
     // Remove "ipfs://" prefix and any URI attributes
     const cleanUri = uri.replace('ipfs://', '').split('?')[0];
 
     // Pin the content
-    const pinResponse = await axios.post(`http://${ipfsHost}:${ipfsPort}/api/v0/pin/add?arg=${cleanUri}`);
+    const pinResponse = await axios.post(`http://${ipfsHost}:${ipfsPort}/api/v0/pin/add?arg=${cleanUri}`,
+                                        null,
+                                        { timeout });
 
     // If the pin operation was not successful, return false
     if (pinResponse.status !== 200) {
@@ -70,7 +75,11 @@ async function pinIPFS(uri: string): Promise<boolean> {
     console.log(`Successfully pinned IPFS URI: ${cleanUri}`);
     return true;
   } catch (error) {
-    console.error(`Error pinning IPFS URI: ${uri}`, error);
+    if (error.code === 'ECONNABORTED') {
+      console.error(`Request timed out while pinning IPFS URI: ${uri}`);
+    } else {
+      console.error(`Error pinning IPFS URI: ${uri}`, error);
+    }
     return false;
   }
 }
