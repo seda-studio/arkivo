@@ -1,12 +1,24 @@
 {
   "commands": {
-    "fetch:artifacts": {
+    "artifacts:pin": {
       "settings": {
         "loadApp": true,
         "stayAlive": false
       },
-      "commandPath": "./commands/FetchArtifacts",
-      "commandName": "fetch:artifacts",
+      "commandPath": "./commands/ArtifactsPin",
+      "commandName": "artifacts:pin",
+      "description": "Fetches and Pins already existing artifacts records",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
+    "artifacts:fetch": {
+      "settings": {
+        "loadApp": true,
+        "stayAlive": false
+      },
+      "commandPath": "./commands/ArtifactsFetch",
+      "commandName": "artifacts:fetch",
       "description": "Fetches artifacts' metadata from the specified platform, optionally pinning their payloads",
       "args": [
         {
