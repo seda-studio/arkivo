@@ -1,6 +1,7 @@
 import { BaseCommand, args, flags } from '@adonisjs/core/build/standalone'
 import { Queue } from '@ioc:Rlanz/Queue';
 import axios from 'axios'
+import { ProcessArtifactPayload } from 'App/Jobs/ProcessArtifact'
 
 let offset = 0;
 let limit = 100;
@@ -123,10 +124,15 @@ export default class ArtifactsFetch extends BaseCommand {
                 .attach(tags.map(tag => tag.id));
 
             
-            const tokenId = artifact.tokenId;
+            const payload: ProcessArtifactPayload = {
+              chain: artifact.chain,
+              contractAddress: artifact.contractAddress,
+              tokenId: artifact.tokenId
+            }
 
-            await Queue.dispatch('App/Jobs/ProcessArtifact', { chain: artifact.chain, contractAddress: artifact.contractAddress, tokenId});
-            this.logger.info('Token sent for processing: ' + token.token_id);
+
+            await Queue.dispatch('App/Jobs/ProcessArtifact', payload);
+            this.logger.info('Token sent for processing: ' + payload.tokenId);
           }
 
 

@@ -1,5 +1,7 @@
 import { BaseCommand } from '@adonisjs/core/build/standalone'
 import { Queue } from '@ioc:Rlanz/Queue';
+import { ProcessArtifactPayload } from 'App/Jobs/ProcessArtifact'
+
 
 export default class ArtifactPin extends BaseCommand {
   /**
@@ -39,7 +41,14 @@ export default class ArtifactPin extends BaseCommand {
       // for each result, dispatch a job to process the artifact
 
       for (let artifact of artifacts) {
-        await Queue.dispatch('App/Jobs/ProcessArtifact', { chain: artifact.chain, contractAddress: artifact.contractAddress, tokenId: artifact.tokenId});
+
+        const payload: ProcessArtifactPayload = {
+          chain: artifact.chain,
+          contractAddress: artifact.contractAddress,
+          tokenId: artifact.tokenId
+        }
+
+        await Queue.dispatch('App/Jobs/ProcessArtifact', payload);
         this.logger.info('Token sent for processing: ' + artifact.tokenId);
       }
 
