@@ -1,6 +1,6 @@
 import { BaseCommand } from '@adonisjs/core/build/standalone'
 import { Queue } from '@ioc:Rlanz/Queue';
-import { ProcessArtifactPayload } from 'App/Jobs/ProcessArtifact'
+import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
 
 
 export default class ArtifactPin extends BaseCommand {
@@ -43,6 +43,7 @@ export default class ArtifactPin extends BaseCommand {
       for (let artifact of artifacts) {
 
         const payload: ProcessArtifactPayload = {
+          operation: ProcessOperation.FETCH_AND_PIN,
           chain: artifact.chain,
           contractAddress: artifact.contractAddress,
           tokenId: artifact.tokenId

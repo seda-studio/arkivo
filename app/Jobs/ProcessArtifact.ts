@@ -3,7 +3,16 @@ import Env from '@ioc:Adonis/Core/Env'
 import Artifact from 'App/Models/Artifact'
 import axios from 'axios'
 
+export enum ProcessOperation {
+  FETCH = 1,
+  FETCH_AND_PIN = 2,
+  PIN = 3,
+  UNPIN = 4,
+  SNAPSHOT = 5
+}
+
 export type ProcessArtifactPayload = {
+  operation: ProcessOperation;
   chain: string,
   contractAddress: string,
   tokenId: string,

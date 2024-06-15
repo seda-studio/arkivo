@@ -1,25 +1,13 @@
 {
   "commands": {
-    "artifacts:pin": {
+    "artifacts:discover": {
       "settings": {
         "loadApp": true,
         "stayAlive": false
       },
-      "commandPath": "./commands/ArtifactsPin",
-      "commandName": "artifacts:pin",
-      "description": "Fetches and Pins already existing artifacts records",
-      "args": [],
-      "aliases": [],
-      "flags": []
-    },
-    "artifacts:fetch": {
-      "settings": {
-        "loadApp": true,
-        "stayAlive": false
-      },
-      "commandPath": "./commands/ArtifactsFetch",
-      "commandName": "artifacts:fetch",
-      "description": "Fetches artifacts' metadata from the specified platform, optionally pinning their payloads",
+      "commandPath": "./commands/ArtifactsDiscover",
+      "commandName": "artifacts:discover",
+      "description": "Discovers new artifacts' metadata from the specified platform, optionally pinning their payloads",
       "args": [
         {
           "type": "string",
@@ -39,6 +27,18 @@
           "description": "Pin payloads"
         }
       ]
+    },
+    "artifacts:pin": {
+      "settings": {
+        "loadApp": true,
+        "stayAlive": false
+      },
+      "commandPath": "./commands/ArtifactsPin",
+      "commandName": "artifacts:pin",
+      "description": "Fetches and Pins already existing artifacts records",
+      "args": [],
+      "aliases": [],
+      "flags": []
     },
     "dump:rcfile": {
       "settings": {},

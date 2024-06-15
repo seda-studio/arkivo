@@ -3,6 +3,7 @@ import Artifact from 'App/Models/Artifact'
 import Tag from 'App/Models/Tag'
 import Env from '@ioc:Adonis/Core/Env'
 import { Queue } from '@ioc:Rlanz/Queue';
+import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
 
 export default class ArtifactsController {
 
@@ -71,7 +72,16 @@ export default class ArtifactsController {
 
             if (artifact) {
             {
-                Queue.dispatch('App/Jobs/ProcessArtifact', { chain: chain, contractAddress: contractAddress, tokenId});
+
+                const payload: ProcessArtifactPayload = {
+                    operation: ProcessOperation.FETCH_AND_PIN,
+                    chain: chain,
+                    contractAddress: contractAddress,
+                    tokenId: tokenId
+                }
+
+
+                Queue.dispatch('App/Jobs/ProcessArtifact',  payload);
                 return "Job queued OK";
             }
         }

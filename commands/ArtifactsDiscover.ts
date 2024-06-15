@@ -1,7 +1,7 @@
 import { BaseCommand, args, flags } from '@adonisjs/core/build/standalone'
 import { Queue } from '@ioc:Rlanz/Queue';
 import axios from 'axios'
-import { ProcessArtifactPayload } from 'App/Jobs/ProcessArtifact'
+import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
 
 let offset = 0;
 let limit = 100;
@@ -33,12 +33,12 @@ function getQuery() {
 }
 
 
-export default class ArtifactsFetch extends BaseCommand {
+export default class ArtifactsDiscover extends BaseCommand {
 
   /**
    * Command name is used to run the command
    */
-  public static commandName = 'artifacts:fetch'
+  public static commandName = 'artifacts:discover'
 
   @args.string({ description: 'Artifact platform' })
   public platform: string
@@ -49,7 +49,7 @@ export default class ArtifactsFetch extends BaseCommand {
   /**
    * Command description is displayed in the "help" output
    */
-  public static description = 'Fetches artifacts\' metadata from the specified platform, optionally pinning their payloads'
+  public static description = 'Discovers new artifacts\' metadata from the specified platform, optionally pinning their payloads'
 
   public static settings = {
     /**
@@ -123,16 +123,19 @@ export default class ArtifactsFetch extends BaseCommand {
                 .related('tags')
                 .attach(tags.map(tag => tag.id));
 
-            
-            const payload: ProcessArtifactPayload = {
-              chain: artifact.chain,
-              contractAddress: artifact.contractAddress,
-              tokenId: artifact.tokenId
+
+            if(this.pin) {
+              const payload: ProcessArtifactPayload = {
+                operation: ProcessOperation.FETCH_AND_PIN,
+                chain: artifact.chain,
+                contractAddress: artifact.contractAddress,
+                tokenId: artifact.tokenId
+              }
+
+              await Queue.dispatch('App/Jobs/ProcessArtifact', payload);
+              this.logger.info('Token sent for processing: ' + payload.tokenId);
             }
 
-
-            await Queue.dispatch('App/Jobs/ProcessArtifact', payload);
-            this.logger.info('Token sent for processing: ' + payload.tokenId);
           }
 
 
