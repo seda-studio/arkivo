@@ -43,7 +43,7 @@ export default class ArtifactPin extends BaseCommand {
       for (let artifact of artifacts) {
 
         const payload: ProcessArtifactPayload = {
-          operation: ProcessOperation.FETCH_AND_PIN,
+          operations: [ ProcessOperation.PIN ],
           chain: artifact.chain,
           contractAddress: artifact.contractAddress,
           tokenId: artifact.tokenId

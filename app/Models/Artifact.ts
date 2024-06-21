@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column, HasMany, hasMany, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
 import Tag from 'App/Models/Tag'
+import Snapshot from 'App/Models/Snapshot'
 
 export default class Artifact extends BaseModel {
   @column({ isPrimary: true })
@@ -14,6 +15,9 @@ export default class Artifact extends BaseModel {
 
   @column()
   public tokenId: string
+
+  @column()
+  public platform: string
 
   @column()
   public metadataUri: string
@@ -34,7 +38,10 @@ export default class Artifact extends BaseModel {
   public mimeType: string
 
   @column()
-  public creatorAddress: string
+  public artistAddress: string
+
+  @column()
+  public mintedAt: DateTime
 
   @column()
   public artifactSize: number | null
@@ -56,4 +63,7 @@ export default class Artifact extends BaseModel {
 
   @manyToMany(() => Tag)
   public tags: ManyToMany<typeof Tag>
+
+  @hasMany(() => Snapshot)
+  public snapshots: HasMany<typeof Snapshot>
 }

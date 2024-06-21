@@ -14,9 +14,7 @@ function getQuery() {
       token_id
       name
       artifact_uri
-      metadata {
-        uri
-      }
+      metadata_uri
       mime_type
       description
       tags {
@@ -26,6 +24,7 @@ function getQuery() {
   
       fa2_address
       platform
+      minted_at
     }
   }
 
@@ -45,6 +44,9 @@ export default class ArtifactsDiscover extends BaseCommand {
 
   @flags.boolean({ alias: 'p', description: 'Pin payloads' })
   public pin: boolean
+
+  @flags.boolean({ alias: 's', description: 'Snapshot artifacts' })
+  public snapshot: boolean
 
   /**
    * Command description is displayed in the "help" output
@@ -101,13 +103,15 @@ export default class ArtifactsDiscover extends BaseCommand {
             artifact.chain = "tezos"
             artifact.contractAddress = token.fa2_address
             artifact.tokenId = token.token_id
-            artifact.metadataUri = token.metadata.uri
+            artifact.platform = token.platform
+            artifact.metadataUri = token.metadata_uri
             artifact.artifactUri = token.artifact_uri
             artifact.displayUri = token.artifact_uri
             artifact.title = token.name
             artifact.description = token.description
-            artifact.creatorAddress = token.artist_address
+            artifact.artistAddress = token.artist_address
             artifact.mimeType = token.mime_type
+            artifact.mintedAt = token.minted_at
             artifact.artifactSize = 0
             artifact.isFetched = false
             artifact.isPinned = false
@@ -124,9 +128,21 @@ export default class ArtifactsDiscover extends BaseCommand {
                 .attach(tags.map(tag => tag.id));
 
 
-            if(this.pin) {
+            if(this.pin || this.snapshot) {
+              let ops: ProcessOperation[] = [];
+
+              if(this.pin) {
+                ops.push(ProcessOperation.FETCH);
+                ops.push(ProcessOperation.PIN);
+              }
+
+              if(this.snapshot) {
+                ops.push(ProcessOperation.SNAPSHOT);
+              }
+
+
               const payload: ProcessArtifactPayload = {
-                operation: ProcessOperation.FETCH_AND_PIN,
+                operations: ops,
                 chain: artifact.chain,
                 contractAddress: artifact.contractAddress,
                 tokenId: artifact.tokenId
