@@ -22,7 +22,7 @@ export default class SnapshotArtifactService {
         };
     }
 
-    async snapshot(artifact: Artifact, outputPath: string): Promise<void> {
+    async snapshot(artifact: Artifact): Promise<void> {
 
         // strip ipfs prefix from url
         let url = artifact.artifactUri;
@@ -43,8 +43,6 @@ export default class SnapshotArtifactService {
 
         // Wait a few seconds
         await page.waitForTimeout(30000);
-
-        await page.screenshot({ path: outputPath });
 
         // capture screenshot
         const buffer = await page.screenshot();

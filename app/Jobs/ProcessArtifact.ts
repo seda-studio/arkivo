@@ -92,7 +92,7 @@ async function opSnapshot(artifact: Artifact) {
   console.log(`ProcessArtifact: snapshotting artifact ${artifact.artifactUri}`);
 
   const snapshotService = new SnapshotArtifactService()
-  await snapshotService.snapshot(artifact, 'screenshot.png')
+  await snapshotService.snapshot(artifact)
 
 }
 
