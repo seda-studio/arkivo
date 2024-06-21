@@ -1,5 +1,6 @@
 
 export interface IHttpRequest {
+    url: string;
     method: string;
     type: string;
     protocol?: string;
@@ -39,7 +40,17 @@ export interface INetworkData {
 export interface ISnapshotDataV1 {
     version: 1;
     timestamp: number;
-    net: INetworkData[];
-    consoleMessages: IConsoleMessage[];
-    screenshot: string; // base64
+    artifact: {
+        chain: string;
+        contractAddress: string;
+        tokenId: string;
+        title: string;
+        description: string;
+        artist: string;
+    };
+    snapshot: {
+        net: INetworkData[];
+        consoleMessages: IConsoleMessage[];
+        screenshot: string; // base64
+    }
 }
