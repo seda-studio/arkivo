@@ -25,6 +25,13 @@
           "type": "boolean",
           "alias": "p",
           "description": "Pin payloads"
+        },
+        {
+          "name": "snapshot",
+          "propertyName": "snapshot",
+          "type": "boolean",
+          "alias": "s",
+          "description": "Snapshot artifacts"
         }
       ]
     },
@@ -37,6 +44,40 @@
       "commandName": "artifacts:pin",
       "description": "Fetches and Pins already existing artifacts records",
       "args": [],
+      "aliases": [],
+      "flags": []
+    },
+    "artifacts:snapshot": {
+      "settings": {
+        "loadApp": true,
+        "stayAlive": false
+      },
+      "commandPath": "./commands/ArtifactsSnapshot",
+      "commandName": "artifacts:snapshot",
+      "description": "Take a snapshot of an artifact",
+      "args": [
+        {
+          "type": "string",
+          "propertyName": "chain",
+          "name": "chain",
+          "required": true,
+          "description": "Chain (tezos, ethereum, solana, etc)"
+        },
+        {
+          "type": "string",
+          "propertyName": "contract",
+          "name": "contract",
+          "required": true,
+          "description": "Contract address"
+        },
+        {
+          "type": "string",
+          "propertyName": "token_id",
+          "name": "token_id",
+          "required": true,
+          "description": "Token Id"
+        }
+      ],
       "aliases": [],
       "flags": []
     },

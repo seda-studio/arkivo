@@ -36,7 +36,7 @@ export default class ArtifactsController {
         artifact.title = 'Blank Genesis'
         artifact.description = 'An intentionally blank genesis OBJKT by Filipe Farinha, (@ktorn on Twitter)'
         artifact.mimeType = 'image/png'
-        artifact.creatorAddress = 'tz1dd2tmTJFRJh8ycLuZeMpKLquJYkMypu2Q'
+        artifact.artistAddress = 'tz1dd2tmTJFRJh8ycLuZeMpKLquJYkMypu2Q'
         artifact.artifactSize = 0
         artifact.isFetched = false
         artifact.isPinned = false
@@ -74,7 +74,7 @@ export default class ArtifactsController {
             {
 
                 const payload: ProcessArtifactPayload = {
-                    operation: ProcessOperation.FETCH_AND_PIN,
+                    operations: [ ProcessOperation.FETCH, ProcessOperation.PIN ],
                     chain: chain,
                     contractAddress: contractAddress,
                     tokenId: tokenId
