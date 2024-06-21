@@ -16,13 +16,33 @@ export default class SnapshotArtifactService {
         this.snapshotData = {
             version: 1,
             timestamp: Date.now(),
-            net: [],
-            consoleMessages: [],
-            screenshot: ''
+            artifact: {
+                chain: '',
+                contractAddress: '',
+                tokenId: '',
+                title: '',
+                description: '',
+                artist: ''
+            },
+            snapshot: {
+                net: [],
+                consoleMessages: [],
+                screenshot: ''
+            }
         };
     }
 
     async snapshot(artifact: Artifact): Promise<void> {
+
+
+        // populate artifact info in snapshot data
+        this.snapshotData.artifact.chain = artifact.chain;
+        this.snapshotData.artifact.contractAddress = artifact.contractAddress;
+        this.snapshotData.artifact.tokenId = artifact.tokenId;
+        this.snapshotData.artifact.title = artifact.title;
+        this.snapshotData.artifact.description = artifact.description || '';
+        this.snapshotData.artifact.artist = artifact.artistAddress;
+        
 
         // strip ipfs prefix from url
         let url = artifact.artifactUri;
@@ -46,7 +66,7 @@ export default class SnapshotArtifactService {
 
         // capture screenshot
         const buffer = await page.screenshot();
-        this.snapshotData.screenshot = buffer.toString('base64');
+        this.snapshotData.snapshot.screenshot = buffer.toString('base64');
 
         await artifact.related('snapshots').create({
             version: this.snapshotData.version,
@@ -72,7 +92,7 @@ export default class SnapshotArtifactService {
             messageText = JSON.stringify(msg.args());
         }
 
-        this.snapshotData.consoleMessages.push({
+        this.snapshotData.snapshot.consoleMessages.push({
             timestamp: Date.now(),
             level: msg.type(),
             text: messageText
@@ -82,9 +102,18 @@ export default class SnapshotArtifactService {
     private processRequest(request: Request) {
         const url = new URL(request.url());
 
-        console.log('Request >>', url.hostname, " vs ", ipfsGatewayHost);
+        if(url.hostname == '') {
+            console.log('Request >>', request.url(), " vs ", ipfsGatewayHost);
+        } else {
+            console.log('Request >>', url.hostname, " vs ", ipfsGatewayHost);
+        }
 
-        const external = url.hostname != ipfsGatewayHost;
+        
+
+        // check if the request is different from the ipfs gateway (potentially external call)
+        // and not a blob request (since blob calls result in different hostnames but are not external calls)
+        // if both checks pass, mark the artifact as networked
+        const external = (url.hostname != ipfsGatewayHost) && !(url.protocol.startsWith('blob'));
 
         if (external) {
             this.extNetCalls = true;
@@ -95,11 +124,12 @@ export default class SnapshotArtifactService {
             postData = JSON.stringify(postData);
         }
 
-        this.snapshotData.net.push({
+        this.snapshotData.snapshot.net.push({
             type: HttpType.REQUEST,
             timestamp: Date.now(),
             external: external,
             data: {
+                url: request.url(),
                 method: request.method(),
                 type: 'http',
                 protocol: url.protocol,
@@ -133,7 +163,7 @@ export default class SnapshotArtifactService {
             }
         }
 
-        this.snapshotData.net.push({
+        this.snapshotData.snapshot.net.push({
             type: HttpType.RESPONSE,
             timestamp: Date.now(),
             external: external,
