@@ -4,6 +4,8 @@ coverage
 .vscode
 .DS_STORE
 .env
+.env.test
+.env.dev
 tmp
 TODO
 /test-results/
