@@ -3,6 +3,9 @@ import Env from '@ioc:Adonis/Core/Env'
 import Artifact from 'App/Models/Artifact'
 import axios from 'axios'
 import SnapshotArtifactService from 'App/Services/SnapshotArtifactService'
+import { Queue } from '@ioc:Rlanz/Queue';
+
+const QUEUE_SNAPSHOT = Env.get('QUEUE_NAME_SNAPSHOT')
 
 export enum ProcessOperation {
   FETCH = 1,
@@ -39,6 +42,19 @@ export default class ProcessArtifact implements JobHandlerContract {
 
       if(artifact) {
 
+        // if there are multiple operations along with a snapshot, we need to re-queue the snapshot operation at the end of processing
+        // this ensures fast processing of other batch operations, keeping snapshot operation in its own (slower) queue
+        // Importantly, snapshots are only queued after all other operations in a job are completed, because the snapshot may require
+        // ops like fetching to be completed first.
+        let requeueSnapshot = false;
+        if(payload.operations.length > 1 && payload.operations.includes(ProcessOperation.SNAPSHOT)) {
+          requeueSnapshot = true;
+          // remove the snapshot op from the list
+          let snapshotIndex = payload.operations.indexOf(ProcessOperation.SNAPSHOT);
+          payload.operations.splice(snapshotIndex, 1);
+        }
+
+
         for(let operation of payload.operations) {
           switch(operation) {
             case ProcessOperation.FETCH:
@@ -54,6 +70,17 @@ export default class ProcessArtifact implements JobHandlerContract {
               await opSnapshot(artifact);
               break;
           }
+      }
+
+      if(requeueSnapshot) {
+        const snapshotPayload: ProcessArtifactPayload = {
+          operations: [ProcessOperation.SNAPSHOT],
+          chain: artifact.chain,
+          contractAddress: artifact.contractAddress,
+          tokenId: artifact.tokenId
+        }
+
+        await Queue.dispatch('App/Jobs/ProcessArtifact', snapshotPayload, {queueName: QUEUE_SNAPSHOT});
       }
     }
 

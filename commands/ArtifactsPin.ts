@@ -1,7 +1,9 @@
 import { BaseCommand } from '@adonisjs/core/build/standalone'
 import { Queue } from '@ioc:Rlanz/Queue';
+import Env from '@ioc:Adonis/Core/Env'
 import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
 
+const QUEUE_IPFS = Env.get('QUEUE_NAME_IPFS')
 
 export default class ArtifactPin extends BaseCommand {
   /**
@@ -49,7 +51,7 @@ export default class ArtifactPin extends BaseCommand {
           tokenId: artifact.tokenId
         }
 
-        await Queue.dispatch('App/Jobs/ProcessArtifact', payload);
+        await Queue.dispatch('App/Jobs/ProcessArtifact', payload, {queueName: QUEUE_IPFS});
         this.logger.info('Token sent for processing: ' + artifact.tokenId);
       }
 

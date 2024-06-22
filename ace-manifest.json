@@ -79,7 +79,15 @@
         }
       ],
       "aliases": [],
-      "flags": []
+      "flags": [
+        {
+          "name": "all",
+          "propertyName": "all",
+          "type": "boolean",
+          "alias": "a",
+          "description": "Snapshot all artifacts"
+        }
+      ]
     },
     "dump:rcfile": {
       "settings": {},
