@@ -3,8 +3,6 @@ import { Queue } from '@ioc:Rlanz/Queue';
 import Env from '@ioc:Adonis/Core/Env'
 import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
 
-const QUEUE_IPFS = Env.get('QUEUE_NAME_IPFS')
-
 export default class ArtifactPin extends BaseCommand {
   /**
    * Command name is used to run the command
@@ -33,6 +31,8 @@ export default class ArtifactPin extends BaseCommand {
   }
 
   public async run() {
+
+    const QUEUE_IPFS = Env.get('QUEUE_NAME_IPFS');
 
     const { default: Artifact } = await import ('App/Models/Artifact')
 

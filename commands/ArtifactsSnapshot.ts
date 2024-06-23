@@ -4,8 +4,6 @@ import Env from '@ioc:Adonis/Core/Env'
 import Artifact from 'App/Models/Artifact'
 import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
 
-const QUEUE_SNAPSHOT = Env.get('QUEUE_NAME_SNAPSHOT')
-
 export default class ArtifactsSnapshot extends BaseCommand {
   /**
    * Command name is used to run the command
@@ -46,6 +44,8 @@ export default class ArtifactsSnapshot extends BaseCommand {
   }
 
   public async run() {
+
+    const QUEUE_SNAPSHOT = Env.get('QUEUE_NAME_SNAPSHOT');
 
     if (this.all) {
 

@@ -7,8 +7,6 @@ import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifa
 let offset = 0;
 let limit = 100;
 
-const QUEUE_IPFS = Env.get('QUEUE_NAME_IPFS')
-
 function getQuery() {
 
   return `
@@ -74,6 +72,7 @@ export default class ArtifactsDiscover extends BaseCommand {
 
   public async run() {
 
+    const QUEUE_IPFS = Env.get('QUEUE_NAME_IPFS');
     const { default: Artifact } = await import ('App/Models/Artifact')
     const { default: Tag } = await import ('App/Models/Tag')
 
