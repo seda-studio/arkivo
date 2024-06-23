@@ -15,11 +15,13 @@ export default class ArtifactsController {
         // const artifact = await Artifact.query().where('id', params.id).preload('tags').firstOrFail()
         const artifact = await (await Artifact.findOrFail(params.id));
 
-        const ipfsHost = Env.get('IPFS_HOST')
+        // const ipfsHost = Env.get('IPFS_HOST')
+
+        const ipfsGateway = Env.get('IPFS_GATEWAY')
 
             // Remove "ipfs://" prefix and any URI attributes
             const cleanUri = artifact.artifactUri.replace('ipfs://', '').split('?')[0];
-            artifact.artifactUri = 'https://' + ipfsHost + '/ipfs/' + cleanUri;
+            artifact.artifactUri = ipfsGateway + "/" + cleanUri;
 
         return view.render('artifact', { artifact })
     }
