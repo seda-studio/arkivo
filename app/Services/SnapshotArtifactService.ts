@@ -34,7 +34,6 @@ export default class SnapshotArtifactService {
 
     async snapshot(artifact: Artifact): Promise<void> {
 
-
         // populate artifact info in snapshot data
         this.snapshotData.artifact.chain = artifact.chain;
         this.snapshotData.artifact.contractAddress = artifact.contractAddress;
@@ -52,6 +51,7 @@ export default class SnapshotArtifactService {
 
         console.log(`Attempting to snapshot IPFS URI: ${pageUrl}`);
         const browser = await chromium.launch();
+        const context = await browser.newContext();
         const page = await browser.newPage();
 
         // Subscribe to 'request' and 'response' events.
@@ -73,9 +73,6 @@ export default class SnapshotArtifactService {
             data: this.snapshotData
         });
 
-
-        await browser.close();
-
         // update artifact networked status if necessary
         if (!artifact.isNetworked && this.extNetCalls) {
             console.log(`Artifact ${artifact.id} is networked`);
@@ -83,6 +80,10 @@ export default class SnapshotArtifactService {
             await artifact.save();
         }
 
+        // playwright cleanup
+        await page.close();
+        await context.close();
+        await browser.close();
     }
 
     processConsole(msg: ConsoleMessage): void {
@@ -100,15 +101,7 @@ export default class SnapshotArtifactService {
     }
 
     private processRequest(request: Request) {
-        const url = new URL(request.url());
-
-        if(url.hostname == '') {
-            console.log('Request >>', request.url(), " vs ", ipfsGatewayHost);
-        } else {
-            console.log('Request >>', url.hostname, " vs ", ipfsGatewayHost);
-        }
-
-        
+        const url = new URL(request.url());        
 
         // check if the request is different from the ipfs gateway (potentially external call)
         // and not a blob request (since blob calls result in different hostnames but are not external calls)
