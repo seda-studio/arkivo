@@ -7,6 +7,8 @@ import { Queue } from '@ioc:Rlanz/Queue';
 
 const QUEUE_SNAPSHOT = Env.get('QUEUE_NAME_SNAPSHOT')
 
+const MAX_SNAPSHOT_HANDLES_BEFORE_EXIT = 5;
+
 export enum ProcessOperation {
   FETCH = 1,
   PIN = 2,
@@ -22,6 +24,9 @@ export type ProcessArtifactPayload = {
 }
 
 export default class ProcessArtifact implements JobHandlerContract {
+
+  static snapshotHandleCount = 0;
+
 	constructor(public job: Job) {
     this.job = job
   }
@@ -67,7 +72,14 @@ export default class ProcessArtifact implements JobHandlerContract {
               await opUnpin(artifact);
               break;
             case ProcessOperation.SNAPSHOT:
+              ProcessArtifact.snapshotHandleCount++;
               await opSnapshot(artifact);
+
+              if (ProcessArtifact.snapshotHandleCount >= MAX_SNAPSHOT_HANDLES_BEFORE_EXIT) {
+                console.log('Snapshot Handle function called ' + MAX_SNAPSHOT_HANDLES_BEFORE_EXIT + ' times. Exiting...');
+                process.exit();
+              }
+
               break;
           }
       }
