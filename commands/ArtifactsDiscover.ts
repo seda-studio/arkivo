@@ -16,6 +16,7 @@ function getQuery() {
       name
       artifact_uri
       metadata_uri
+      thumbnail_uri
       mime_type
       description
       tags {
@@ -109,6 +110,7 @@ export default class ArtifactsDiscover extends BaseCommand {
             artifact.metadataUri = token.metadata_uri
             artifact.artifactUri = token.artifact_uri
             artifact.displayUri = token.artifact_uri
+            artifact.thumbnailUri = token.thumbnail_uri
             artifact.title = token.name
             artifact.description = token.description
             artifact.artistAddress = token.artist_address
@@ -167,6 +169,62 @@ export default class ArtifactsDiscover extends BaseCommand {
     }
 
   }
+
+
+
+  public async updateThumbs() {
+
+    const QUEUE_IPFS = Env.get('QUEUE_NAME_IPFS');
+    const { default: Artifact } = await import ('App/Models/Artifact')
+    const { default: Tag } = await import ('App/Models/Tag')
+  
+    this.logger.info('Preparing to fetch artifact metadata from: ' + this.platform)
+  
+  
+    // this.logger.debug(query);
+  
+    while( true ) {
+  
+      let query = getQuery();
+  
+      const response = await makeGraphQLRequest(query);
+  
+      if(response && response.data && response.data.data && response.data.data.tokens && response.data.data.tokens.length > 0) {
+  
+  
+        for(const token of response.data.data.tokens) {
+  
+          let artifact = await Artifact.query()
+            .where('chain', 'tezos')
+            .andWhere('contract_address', token.fa2_address)
+            .andWhere('token_id', token.token_id)
+            .first()
+  
+
+            if(artifact) {
+             artifact.thumbnailUri = token.thumbnail_uri
+              await artifact.save()
+            }
+
+          }
+  
+  
+        }
+      }
+  
+      offset += limit;
+    }
+  
+  }
+
+
+
+
+
+
+
+
+
 }
 
 
@@ -195,6 +253,9 @@ async function makeGraphQLRequest(query: string) {
     console.error(error);
   }
 }
+
+
+
 
 
 /**

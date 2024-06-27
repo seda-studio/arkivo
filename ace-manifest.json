@@ -89,6 +89,26 @@
         }
       ]
     },
+    "artifacts:updateMetadata": {
+      "settings": {
+        "loadApp": true,
+        "stayAlive": false
+      },
+      "commandPath": "./commands/UpdateMetadata",
+      "commandName": "artifacts:updateMetadata",
+      "description": "Update all token metadata for the specified platform",
+      "args": [
+        {
+          "type": "string",
+          "propertyName": "platform",
+          "name": "platform",
+          "required": true,
+          "description": "Artifact platform"
+        }
+      ],
+      "aliases": [],
+      "flags": []
+    },
     "dump:rcfile": {
       "settings": {},
       "commandPath": "@adonisjs/core/build/commands/DumpRc",

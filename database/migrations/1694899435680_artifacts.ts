@@ -13,6 +13,7 @@ export default class extends BaseSchema {
       table.text('metadata_uri')
       table.text('artifact_uri')
       table.text('display_uri')
+      table.text('thumbnail_uri')
       table.text('title')
       table.text('description')
       table.string('mime_type')

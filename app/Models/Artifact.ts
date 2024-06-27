@@ -29,6 +29,9 @@ export default class Artifact extends BaseModel {
   public displayUri: string
 
   @column()
+  public thumbnailUri: string
+
+  @column()
   public title: string
 
   @column()
