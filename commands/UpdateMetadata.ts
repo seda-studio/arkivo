@@ -1,4 +1,4 @@
-import { BaseCommand, args, flags  } from '@adonisjs/core/build/standalone'
+import { BaseCommand, args} from '@adonisjs/core/build/standalone'
 import axios from 'axios'
 
 
