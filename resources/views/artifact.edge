@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artifact</title>
-    @entryPointStyles('app')
-</head>
-<body>
+@layout('layouts/main')
+
+@section('body')
+
     <div class="flex-container">
         <iframe class='artifact-main' src = "{{ artifact.artifactUri }}" ></iframe>
     </div>
@@ -20,5 +15,4 @@
         <p>{{ artifact.mintedAt }}</p>
 
     </div>
-</body>
-</html>
+@end

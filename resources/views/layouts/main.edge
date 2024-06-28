@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdonisJS - A fully featured web framework for Node.js</title>
+  @entryPointStyles('app')
+  @entryPointScripts('app')
+
+  <style>
+    * { margin: 0; padding: 0; }
+    .header { height: 60px; background: rgba(255,138,0,.2); }
+    .layout { height: calc(100vh - 100px); display: flex; }
+    main { height: 100%; background: #f7f7f7; flex: 1 }
+    .footer { height: 40px; background: #5e5e5e; }
+  </style>
+
+</head>
+
+  <body>
+
+    @include('partials/header')
+
+    @!section('body')
+
+    @include('partials/footer')
+  </body>
+</html>

@@ -89,7 +89,20 @@ main code {
 
 
 
+.header {
+  display: flex; /* Use flexbox to center the image */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  max-height: 30px; /* Set a hardcoded max height */
+  background-color: #f0f0f0; /* Just to visualize the header */
+  padding: 20px;
+}
 
+.header .logo {
+  max-width: 100%; /* Make the image not exceed the container's width */
+  max-height: 100%; /* Make the image not exceed the container's height */
+  object-fit: contain; /* Preserve the image's aspect ratio */
+}
 
 
 

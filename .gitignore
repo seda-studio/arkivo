@@ -8,6 +8,8 @@ coverage
 .env.dev
 tmp
 TODO
+/public/assets/app.css
+/public/assets/app.js
 /test-results/
 /playwright-report/
 /blob-report/
