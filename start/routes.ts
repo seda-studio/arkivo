@@ -33,6 +33,8 @@ Route.group(() => {
 
   Route.get('/:id', 'ArtifactsController.show').as('show')
 
+  Route.get('/:platform/:tokenId', 'ArtifactsController.showPlatformToken').as('showPlatformToken')
+
   Route.post('/', 'ArtifactsController.store').as('store')
 
   Route.post('/:id/edit', 'ArtifactsController.update').as('edit')

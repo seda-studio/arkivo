@@ -8,7 +8,24 @@ import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifa
 export default class ArtifactsController {
 
     public async index({ view }: HttpContextContract) {
-        return view.render('artifacts')
+
+        const artifacts = await Artifact.query()
+                            .orderBy('id', 'desc')
+                            .paginate(1, 50)
+
+        // for each artifact, replace the IPFS URI with the IPFS Gateway URI for artifact and thumbnail URIs
+        const ipfsGateway = Env.get('IPFS_GATEWAY')
+
+        artifacts.forEach(artifact => {
+            const cleanArtifactUri = artifact.artifactUri.replace('ipfs://', '').split('?')[0];
+            const cleanThumbUri = artifact.thumbnailUri.replace('ipfs://', '').split('?')[0];
+
+            artifact.artifactUri = ipfsGateway + "/" + cleanArtifactUri;
+            artifact.thumbnailUri = ipfsGateway + "/" + cleanThumbUri;
+        });
+        
+
+        return view.render('artifacts', { artifacts })
     }
 
     public async show({ view, params }: HttpContextContract) {
@@ -19,9 +36,22 @@ export default class ArtifactsController {
 
         const ipfsGateway = Env.get('IPFS_GATEWAY')
 
-            // Remove "ipfs://" prefix and any URI attributes
-            const cleanUri = artifact.artifactUri.replace('ipfs://', '').split('?')[0];
-            artifact.artifactUri = ipfsGateway + "/" + cleanUri;
+        // Remove "ipfs://" prefix and any URI attributes
+        const cleanUri = artifact.artifactUri.replace('ipfs://', '').split('?')[0];
+        artifact.artifactUri = ipfsGateway + "/" + cleanUri;
+
+        return view.render('artifact', { artifact })
+    }
+
+    public async showPlatformToken({ view, params }: HttpContextContract) {
+
+        const artifact = await Artifact.query().where('platform', params.platform).andWhere('token_id', params.tokenId).firstOrFail()
+
+        const ipfsGateway = Env.get('IPFS_GATEWAY')
+
+        // Remove "ipfs://" prefix and any URI attributes
+        const cleanUri = artifact.artifactUri.replace('ipfs://', '').split('?')[0];
+        artifact.artifactUri = ipfsGateway + "/" + cleanUri;
 
         return view.render('artifact', { artifact })
     }
