@@ -19,9 +19,12 @@ export default class extends BaseSchema {
       table.string('mime_type')
       table.string('artist_address').notNullable()
       table.integer('artifact_size').nullable()
+      table.integer('editions').notNullable()
       table.boolean('is_fetched').notNullable()
       table.boolean('is_pinned').notNullable()
       table.boolean('is_networked').notNullable()
+      table.boolean('is_burned').notNullable()
+      table.boolean('is_restricted').notNullable()
       table.timestamp('minted_at', { useTz: true }).nullable()
 
       table.unique(['chain', 'contract_address', 'token_id'])

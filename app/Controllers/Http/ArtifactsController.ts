@@ -3,42 +3,66 @@ import Artifact from 'App/Models/Artifact'
 import Tag from 'App/Models/Tag'
 import Env from '@ioc:Adonis/Core/Env'
 import { Queue } from '@ioc:Rlanz/Queue';
+import axios from 'axios'
 import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
+import Logger from '@ioc:Adonis/Core/Logger'
+import { truncAddress, getWorkingUri } from 'App/Utils/Utils';
+
+const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
 
 export default class ArtifactsController {
 
-    public async index({ view }: HttpContextContract) {
+    public async index({ view, request, response }: HttpContextContract) {
 
+        const qs = request.qs();
+
+        // check if it has a page parameter, and if not, send a redirect with the parameter
+        if (!qs.page) {
+            Logger.warn('page argument not found in query string. Redirecting to page 1.');
+            response.redirect()
+            .withQs({ page: 1 })
+            .toPath('/artifacts');
+        }
+
+        Logger.warn('page argument found in query string: ' + qs.page);
+        
         const artifacts = await Artifact.query()
+                            .where('isNetworked', true)
+                            .where('isBurned', false)
                             .orderBy('id', 'desc')
-                            .paginate(1, 50)
+                            .paginate(qs.page, 50)
 
-        // for each artifact, replace the IPFS URI with the IPFS Gateway URI for artifact and thumbnail URIs
-        const ipfsGateway = Env.get('IPFS_GATEWAY')
 
-        artifacts.forEach(artifact => {
-            const cleanArtifactUri = artifact.artifactUri.replace('ipfs://', '').split('?')[0];
-            const cleanThumbUri = artifact.thumbnailUri.replace('ipfs://', '').split('?')[0];
+        await Promise.all(artifacts.map(async (artifact) => {
+            artifact.artifactUri = getWorkingUri(artifact.artifactUri);
+            artifact.thumbnailUri = getWorkingUri(artifact.thumbnailUri);
 
-            artifact.artifactUri = ipfsGateway + "/" + cleanArtifactUri;
-            artifact.thumbnailUri = ipfsGateway + "/" + cleanThumbUri;
-        });
+            // populate artist alias
+            let query = getArtistAliasQuery(artifact.artistAddress);
+            const response = await makeGraphQLRequest(query);
+
+            if (response && response.data && response.data.data && response.data.data.tzprofiles && response.data.data.tzprofiles.length > 0) {
+
+                const alias = response.data.data.tzprofiles[0].alias;
+
+                artifact.artistAlias = alias;
+            } else {
+                Logger.debug('No artist alias found for address: ' + artifact.artistAddress);
+                artifact.artistAlias = truncAddress(artifact.artistAddress);
+            }
+        }));
         
 
+        
         return view.render('artifacts', { artifacts })
     }
+
 
     public async show({ view, params }: HttpContextContract) {
         // const artifact = await Artifact.query().where('id', params.id).preload('tags').firstOrFail()
         const artifact = await (await Artifact.findOrFail(params.id));
 
-        // const ipfsHost = Env.get('IPFS_HOST')
-
-        const ipfsGateway = Env.get('IPFS_GATEWAY')
-
-        // Remove "ipfs://" prefix and any URI attributes
-        const cleanUri = artifact.artifactUri.replace('ipfs://', '').split('?')[0];
-        artifact.artifactUri = ipfsGateway + "/" + cleanUri;
+        artifact.artifactUri = getWorkingUri(artifact.artifactUri);
 
         return view.render('artifact', { artifact })
     }
@@ -124,3 +148,54 @@ export default class ArtifactsController {
 
     }
 }
+
+
+function getArtistAliasQuery(address: string) {
+
+    return `
+    query artistInfo($address: String = "${address}") {
+          tzprofiles(where: {account: {_eq: $address}}) {
+                account
+                alias
+                contract
+                description
+                discord
+                domain_name
+                ethereum
+                github
+                logo
+                twitter
+                website
+            }
+        }
+    `;
+  }
+
+
+async function makeGraphQLRequest(query: string) {
+    try {
+      // TODO: use .env variable for the endpoint
+      // alternative instance (Teia): https://teztok.teia.rocks/v1/graphql
+      // const response = await axios.post('https://teztok.teia.rocks/v1/graphql', {
+      // const response = await axios.post('https://graphiql.teztok.com/v1/graphql', {
+      // const response = await axios.post('http://192.168.1.33:8080/v1/graphql', {
+      const response = await axios.post(teztok_endpoint, {
+        query: query,
+      });
+  
+
+    //   console.log(query);
+  
+    //   console.log(JSON.stringify(response.data, null, 2));
+
+  
+  
+      // Handle the response data here
+      // this.logger.info('Indexer response: ' + response.data);
+  
+      return response;
+    } catch (error) {
+      // Handle any errors that occur during the request
+      console.error(error);
+    }
+  }

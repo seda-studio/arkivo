@@ -8,7 +8,7 @@
             <a class="card-image" href="/artifacts/{{ artifact.id }}">
                 <img loading="lazy" src="{{ artifact.thumbnailUri }}" alt="{{ artifact.title }}">
             </a>
-                <h2>Author</h2>
+                <h2>{{ artifact.artistAlias }}</h2>
                 <p>{{ artifact.title }}</p>
             </a>
         </li>

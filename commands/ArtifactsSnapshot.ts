@@ -10,7 +10,7 @@ export default class ArtifactsSnapshot extends BaseCommand {
    */
   public static commandName = 'artifacts:snapshot'
 
-  @args.string({ description: 'Chain (tezos, ethereum, solana, etc)' })
+  @args.string({ description: 'Blockchain (tezos, ethereum, solana, etc)' })
   public chain: string
 
   @args.string({ description: 'Contract address' })

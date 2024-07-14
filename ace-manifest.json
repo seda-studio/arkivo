@@ -61,7 +61,7 @@
           "propertyName": "chain",
           "name": "chain",
           "required": true,
-          "description": "Chain (tezos, ethereum, solana, etc)"
+          "description": "Blockchain (tezos, ethereum, solana, etc)"
         },
         {
           "type": "string",
@@ -97,17 +97,45 @@
       "commandPath": "./commands/UpdateMetadata",
       "commandName": "artifacts:updateMetadata",
       "description": "Update all token metadata for the specified platform",
-      "args": [
-        {
-          "type": "string",
-          "propertyName": "platform",
-          "name": "platform",
-          "required": true,
-          "description": "Artifact platform"
-        }
-      ],
+      "args": [],
       "aliases": [],
-      "flags": []
+      "flags": [
+        {
+          "name": "all",
+          "propertyName": "all",
+          "type": "boolean",
+          "alias": "a",
+          "description": "Update all artifacts"
+        },
+        {
+          "name": "blockchain",
+          "propertyName": "blockchain",
+          "type": "string",
+          "alias": "b",
+          "description": "Blockchain"
+        },
+        {
+          "name": "platform",
+          "propertyName": "platform",
+          "type": "string",
+          "alias": "p",
+          "description": "NFT platform"
+        },
+        {
+          "name": "contract-address",
+          "propertyName": "contractAddress",
+          "type": "string",
+          "alias": "c",
+          "description": "Contract Address"
+        },
+        {
+          "name": "token-id",
+          "propertyName": "tokenId",
+          "type": "string",
+          "alias": "t",
+          "description": "Artifact Token Id"
+        }
+      ]
     },
     "dump:rcfile": {
       "settings": {},
