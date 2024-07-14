@@ -9,6 +9,8 @@ export default class extends BaseSchema {
 
       table.integer('artifact_id').unsigned().references('id').inTable('artifacts').notNullable()
       table.integer('tag_id').unsigned().references('id').inTable('tags').notNullable()
+
+      table.unique(['artifact_id', 'tag_id'])
     })
   }
 

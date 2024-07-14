@@ -1,11 +1,15 @@
 import { BaseCommand, args, flags } from '@adonisjs/core/build/standalone'
 import { Queue } from '@ioc:Rlanz/Queue';
-import Env from '@ioc:Adonis/Core/Env'
+import Env from '@ioc:Adonis/Core/Env';
 import axios from 'axios'
 import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
+import Artifact from 'App/Models/Artifact'
+import Tag from 'App/Models/Tag'
 
 let offset = 0;
 let limit = 100;
+
+const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
 
 function getQuery() {
 
@@ -91,46 +95,19 @@ export default class ArtifactsDiscover extends BaseCommand {
       if(response && response.data && response.data.data && response.data.data.tokens && response.data.data.tokens.length > 0) {
 
 
-        for(const token of response.data.data.tokens) {
+        for(const tokenData of response.data.data.tokens) {
 
           const artifactExists = await Artifact.query()
             .where('chain', 'tezos')
-            .andWhere('contract_address', token.fa2_address)
-            .andWhere('token_id', token.token_id)
+            .andWhere('contract_address', tokenData.fa2_address)
+            .andWhere('token_id', tokenData.token_id)
             .first()
 
 
           if(!artifactExists) {
             const artifact = new Artifact()
 
-            artifact.chain = "tezos"
-            artifact.contractAddress = token.fa2_address
-            artifact.tokenId = token.token_id
-            artifact.platform = token.platform
-            artifact.metadataUri = token.metadata_uri
-            artifact.artifactUri = token.artifact_uri
-            artifact.displayUri = token.artifact_uri
-            artifact.thumbnailUri = token.thumbnail_uri
-            artifact.title = token.name
-            artifact.description = token.description
-            artifact.artistAddress = token.artist_address
-            artifact.mimeType = token.mime_type
-            artifact.mintedAt = token.minted_at
-            artifact.artifactSize = 0
-            artifact.isFetched = false
-            artifact.isPinned = false
-            artifact.isNetworked = false
-    
-            await artifact.save()
-
-
-            const tags = await Tag.updateOrCreateMany('tag', token.tags.map(tag => ({ tag: tag.tag })) )
-    
-    
-            await artifact
-                .related('tags')
-                .attach(tags.map(tag => tag.id));
-
+            await this.createOrUpdateArtifact(artifact, tokenData);
 
             if(this.pin || this.snapshot) {
               let ops: ProcessOperation[] = [];
@@ -171,19 +148,53 @@ export default class ArtifactsDiscover extends BaseCommand {
   }
 
 
+  private async createOrUpdateArtifact(artifact: Artifact, token: any) {
+
+    artifact.chain = "tezos"
+    artifact.contractAddress = token.fa2_address
+    artifact.tokenId = token.token_id
+    artifact.platform = token.platform
+    artifact.metadataUri = token.metadata_uri
+    artifact.artifactUri = token.artifact_uri
+    artifact.displayUri = token.artifact_uri
+    artifact.thumbnailUri = token.thumbnail_uri
+    artifact.title = token.name
+    artifact.description = token.description
+    artifact.artistAddress = token.artist_address
+    artifact.mimeType = token.mime_type
+    artifact.mintedAt = token.minted_at
+    artifact.artifactSize = 0
+    artifact.isFetched = false
+    artifact.isPinned = false
+    artifact.isNetworked = false
+    artifact.isBurned = false
+    artifact.isRestricted = false
+
+    await artifact.save()
+
+    const tags = await Tag.updateOrCreateMany('tag', token.tags.map(tag => ({ tag: tag.tag })) )
+
+
+    await artifact
+        .related('tags')
+        .attach(tags.map(tag => tag.id));
+
+
+  }
+
+
 }
 
 
 
 async function makeGraphQLRequest(query: string) {
   try {
-
-
     // TODO: use .env variable for the endpoint
     // alternative instance (Teia): https://teztok.teia.rocks/v1/graphql
     // const response = await axios.post('https://teztok.teia.rocks/v1/graphql', {
     // const response = await axios.post('https://graphiql.teztok.com/v1/graphql', {
-    const response = await axios.post('http://192.168.1.33:8080/v1/graphql', {
+    // const response = await axios.post('http://192.168.1.33:8080/v1/graphql', {
+    const response = await axios.post(teztok_endpoint, {
       query: query,
     });
 

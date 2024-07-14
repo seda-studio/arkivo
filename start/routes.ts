@@ -23,7 +23,7 @@ import Logger from '@ioc:Adonis/Core/Logger'
 
 
 Route.get('/', async ({ view }) => {
-  Logger.info('##### accounts migration up: using PG_DB_NAME: ' + process.env.PG_DB_NAME)
+  Logger.info('')
   return view.render('welcome')
 })
 

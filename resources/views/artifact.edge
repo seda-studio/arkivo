@@ -1,24 +1,161 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artifact</title>
-    @entryPointStyles('app')
-</head>
-<body>
+@layout('layouts/main')
+
+@section('body')
+
     <div class="flex-container">
         <iframe class='artifact-main' src = "{{ artifact.artifactUri }}" ></iframe>
     </div>
 
-    <div>
 
-        <h1>Artifact: {{ artifact.title }}</h1>
-
-        <p>{{ artifact.description }}</p>
-        <p>{{ artifact.artifactUri}}</p>
-        <p>{{ artifact.mintedAt }}</p>
-
+    <div class="container-fluid text-center my-3">
+        <p class="h3">{{ artifact.title }}</p>
+        <p>{{ artifact.artistAlias ? artifact.artistAlias: artifact.artistAddress }}</p>
     </div>
-</body>
-</html>
+
+    <div class="container-fluid">
+        <div class="row">
+          <div class="col">
+            <div class="accordion" id="leftAccordion">
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDescription" aria-expanded="false" aria-controls="collapseDescription">
+                      Description
+                    </button>
+                  </h2>
+                  <div id="collapseDescription" class="accordion-collapse collapse" data-bs-parent="#leftAccordion">
+                    <div class="accordion-body">
+                        {{ artifact.description }}
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetails" aria-expanded="false" aria-controls="collapseDetails">
+                      Details
+                    </button>
+                  </h2>
+                  <div id="collapseDetails" class="accordion-collapse collapse" data-bs-parent="#leftAccordion">
+                    <div class="accordion-body">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Blockchain</th>
+                                    <td>TODO</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Smart Contract</th>
+                                    <td>TODO</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Platform</th>
+                                    <td>TODO</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Token ID</th>
+                                    <td>{{ artifact.tokenId }}</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Minted at</th>
+                                  <td>{{ artifact.mintedAt }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseURIs" aria-expanded="false" aria-controls="collapseURIs">
+                        Artifact URIs
+                    </button>
+                  </h2>
+                  <div id="collapseURIs" class="accordion-collapse collapse" data-bs-parent="#leftAccordion">
+                    <div class="accordion-body">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Metadata URI</th>
+                                    <td><a href="{{ artifact.metadataUri}}">Metadata URI</a></td>
+                                  </tr>
+                                <tr>
+                                  <th scope="row">Artifact URI</th>
+                                  <td><a href="{{ artifact.artifactUri}}">Artifact URI</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+          <div class="col">
+            
+            <div class="accordion" id="rightAccordion">
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTags" aria-expanded="false" aria-controls="collapseTags">
+                      Tags
+                    </button>
+                  </h2>
+                  <div id="collapseTags" class="accordion-collapse collapse" data-bs-parent="#rightAccordion">
+                    <div class="accordion-body">
+                        Tags will appear here
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClassification" aria-expanded="false" aria-controls="collapseClassification">
+                        Classification
+                    </button>
+                  </h2>
+                  <div id="collapseClassification" class="accordion-collapse collapse" data-bs-parent="#rightAccordion">
+                    <div class="accordion-body">
+                      TODO
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLinks" aria-expanded="false" aria-controls="collapseLinks">
+                        Links
+                    </button>
+                  </h2>
+                  <div id="collapseLinks" class="accordion-collapse collapse" data-bs-parent="#rightAccordion">
+                    <div class="accordion-body">
+                        @if (artifact.platform == "HEN")
+                            <a href="https://teia.art/objkt/{{ artifact.tokenId }}" target="_blank">View on TEIA</a>
+                        @end
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row my-3">
+            <div class="col">
+                
+                <div class="accordion" id="snapshotsAccordion">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSnapshots" aria-expanded="false" aria-controls="collapseSnapshots">
+                          Snapshots
+                        </button>
+                      </h2>
+                      <div id="collapseSnapshots" class="accordion-collapse collapse" data-bs-parent="#snapshotsAccordion">
+                        <div class="accordion-body">
+                            TODO
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+        </div>
+    </div>
+
+@end

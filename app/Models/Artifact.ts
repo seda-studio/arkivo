@@ -43,11 +43,16 @@ export default class Artifact extends BaseModel {
   @column()
   public artistAddress: string
 
+  public artistAlias: string
+
   @column()
   public mintedAt: DateTime
 
   @column()
   public artifactSize: number | null
+
+  @column()
+  public editions: number
 
   @column()
   public isFetched: boolean
@@ -57,6 +62,12 @@ export default class Artifact extends BaseModel {
 
   @column()
   public isNetworked: boolean
+
+  @column()
+  public isBurned: boolean
+
+  @column()
+  public isRestricted: boolean
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
