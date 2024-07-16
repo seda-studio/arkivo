@@ -29,7 +29,7 @@ export default class ArtifactsController {
         const artifacts = await Artifact.query()
                             .where('isNetworked', true)
                             .where('isBurned', false)
-                            .orderBy('id', 'desc')
+                            .orderBy('minted_at', 'desc')
                             .paginate(qs.page, 50)
 
 
@@ -38,18 +38,7 @@ export default class ArtifactsController {
             artifact.thumbnailUri = getWorkingUri(artifact.thumbnailUri);
 
             // populate artist alias
-            let query = getArtistAliasQuery(artifact.artistAddress);
-            const response = await makeGraphQLRequest(query);
-
-            if (response && response.data && response.data.data && response.data.data.tzprofiles && response.data.data.tzprofiles.length > 0) {
-
-                const alias = response.data.data.tzprofiles[0].alias;
-
-                artifact.artistAlias = alias;
-            } else {
-                Logger.debug('No artist alias found for address: ' + artifact.artistAddress);
-                artifact.artistAlias = truncAddress(artifact.artistAddress);
-            }
+            await populateArtistAlias(artifact);
         }));
         
 
@@ -63,6 +52,9 @@ export default class ArtifactsController {
         const artifact = await (await Artifact.findOrFail(params.id));
 
         artifact.artifactUri = getWorkingUri(artifact.artifactUri);
+
+        // populate artist alias
+        await populateArtistAlias(artifact);
 
         return view.render('artifact', { artifact })
     }
@@ -149,6 +141,23 @@ export default class ArtifactsController {
     }
 }
 
+
+async function populateArtistAlias(artifact: Artifact) {
+
+    let query = getArtistAliasQuery(artifact.artistAddress);
+            const response = await makeGraphQLRequest(query);
+
+            if (response && response.data && response.data.data && response.data.data.tzprofiles && response.data.data.tzprofiles.length > 0) {
+
+                const alias = response.data.data.tzprofiles[0].alias;
+
+                artifact.artistAlias = alias;
+            } else {
+                Logger.debug('No artist alias found for address: ' + artifact.artistAddress);
+                artifact.artistAlias = truncAddress(artifact.artistAddress);
+            }
+
+}
 
 function getArtistAliasQuery(address: string) {
 
