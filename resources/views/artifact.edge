@@ -3,7 +3,7 @@
 @section('body')
 
     <div class="flex-container">
-        <iframe class='artifact-main' src = "{{ artifact.artifactUri }}" ></iframe>
+        <iframe class='artifact-main' src = "{{ artifact.artifactUri }}" sandbox = "allow-scripts allow-same-origin allow-modals allow-pointer-lock" allow = "accelerometer; camera; fullscreen; gyroscope; microphone; midi *; xr-spatial-tracking;"></iframe>
     </div>
 
 
