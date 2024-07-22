@@ -117,9 +117,14 @@ async function opPin(artifact: Artifact) {
 
     // 2. pin the artifact payload
     const artifactPinned = await pinIPFS(artifact.artifactUri)
+
+    // 3. retrieve artifact size
+    const artifact_size = await getIPFSFileSize(artifact.artifactUri)
   
     artifact.isFetched = (metadataPinned && artifactPinned)
     artifact.isPinned = (metadataPinned && artifactPinned)
+    artifact.artifactSize = artifact_size
+
     await artifact.save()
 }
 
@@ -214,5 +219,45 @@ async function pinIPFS(uri: string): Promise<boolean> {
       console.error(`Error pinning IPFS URI: ${uri}`, error);
     }
     return false;
+  }
+}
+
+
+/**
+ * Get the size of an IPFS file
+ * @param uri The IPFS URI of the file
+ * @returns The size of the file in bytes
+ */
+async function getIPFSFileSize(uri: string): Promise<number> {
+  const ipfsHost = Env.get('IPFS_HOST')
+  const ipfsPort = Env.get('IPFS_PORT')
+  const timeout = 30000; // Set timeout duration in milliseconds (30000ms = 30 seconds)
+
+  try {
+
+    console.log(`Attempting to get size of IPFS file: ${uri}`);
+
+    // Remove "ipfs://" prefix and any URI attributes
+    const cleanUri = uri.replace('ipfs://', '').split('?')[0];
+
+    // Get the file size
+    const sizeResponse = await axios.post(`http://${ipfsHost}:${ipfsPort}/api/v0/files/stat?arg=/ipfs/${cleanUri}`,
+                                        { timeout });
+
+    // If the size operation was not successful, return -1
+    if (sizeResponse.status !== 200 || !sizeResponse.data || !sizeResponse.data.CumulativeSize) {
+      console.log(`Failed to get size of IPFS file: ${cleanUri}`);
+      return -1;
+    }
+
+    console.log(`Successfully got size of IPFS file: ${cleanUri} - ${sizeResponse.data.CumulativeSize} bytes`);
+    return sizeResponse.data.CumulativeSize;
+  } catch (error) {
+    if (error.code === 'ECONNABORTED') {
+      console.error(`Request timed out while getting size of IPFS file: ${uri}`);
+    } else {
+      console.error(`Error getting size of IPFS file: ${uri}`, error);
+    }
+    return -1;
   }
 }
