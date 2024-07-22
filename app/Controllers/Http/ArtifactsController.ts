@@ -51,7 +51,10 @@ export default class ArtifactsController {
         // const artifact = await Artifact.query().where('id', params.id).preload('tags').firstOrFail()
         const artifact = await (await Artifact.findOrFail(params.id));
 
-        artifact.artifactUri = getWorkingUri(artifact.artifactUri);
+        artifact.artifactUri = getPlatformSpecificUri(artifact);
+
+
+        console.log('Platform specific URI: ' + artifact.artifactUri);
 
         // populate artist alias
         await populateArtistAlias(artifact);
@@ -207,4 +210,21 @@ async function makeGraphQLRequest(query: string) {
       // Handle any errors that occur during the request
       console.error(error);
     }
+  }
+
+
+  function getPlatformSpecificUri(artifact: Artifact) {
+    let stringUri = getWorkingUri(artifact.artifactUri);
+
+    // turn workingUri into a URL object
+    const url = new URL(stringUri);
+
+    if(artifact.platform == 'HEN') {
+        // add viwer and objkt query parameters
+        url.searchParams.set('creator', artifact.artistAddress);
+        url.searchParams.set('viewer', '');
+        url.searchParams.set('objkt', artifact.tokenId);
+    }
+    
+    return url.toString();
   }
