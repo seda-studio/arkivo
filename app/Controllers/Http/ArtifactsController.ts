@@ -6,7 +6,7 @@ import { Queue } from '@ioc:Rlanz/Queue';
 import axios from 'axios'
 import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
 import Logger from '@ioc:Adonis/Core/Logger'
-import { truncAddress, getWorkingUri } from 'App/Utils/Utils';
+import { truncAddress, getWorkingUri, normalizeString } from 'App/Utils/Utils';
 
 const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
 
@@ -27,10 +27,12 @@ export default class ArtifactsController {
         let artifacts;
 
         if (searchQuery) {
+            const normalizedSearchQuery = normalizeString(searchQuery);
+
             artifacts = await Artifact.query()
-                .where('title', 'ILIKE', `%${searchQuery}%`)
-                .orWhere('description', 'ILIKE', `%${searchQuery}%`)
-                .andWhere('isNetworked', true)
+                .whereRaw('normalize(title, NFKD) ILIKE ?', [`%${normalizedSearchQuery}%`])
+                .orWhereRaw('normalize(description, NFKD) ILIKE ?', [`%${normalizedSearchQuery}%`])
+                // .andWhere('isNetworked', true)
                 .andWhere('isBurned', false)
                 .orderBy('minted_at', 'desc')
                 .paginate(qs.page, 50)
@@ -38,7 +40,7 @@ export default class ArtifactsController {
             artifacts.searchQuery = searchQuery;
         } else {
             artifacts = await Artifact.query()
-                .where('isNetworked', true)
+                // .where('isNetworked', true)
                 .where('isBurned', false)
                 .orderBy('minted_at', 'desc')
                 .paginate(qs.page, 50)
