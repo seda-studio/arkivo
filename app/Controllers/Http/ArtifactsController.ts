@@ -12,7 +12,7 @@ const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
 
 export default class ArtifactsController {
 
-    public async index({ view, request, response }: HttpContextContract) {
+    public async index({ view, request }: HttpContextContract) {
 
         const qs = request.qs();
 

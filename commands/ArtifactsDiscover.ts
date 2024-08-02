@@ -79,7 +79,6 @@ export default class ArtifactsDiscover extends BaseCommand {
 
     const QUEUE_IPFS = Env.get('QUEUE_NAME_IPFS');
     const { default: Artifact } = await import ('App/Models/Artifact')
-    const { default: Tag } = await import ('App/Models/Tag')
 
     this.logger.info('Preparing to fetch artifact metadata from: ' + this.platform)
 

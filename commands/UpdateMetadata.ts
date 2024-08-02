@@ -1,4 +1,4 @@
-import { BaseCommand, args, flags } from '@adonisjs/core/build/standalone'
+import { BaseCommand, flags } from '@adonisjs/core/build/standalone'
 import axios from 'axios'
 import Artifact from 'App/Models/Artifact'
 import Tag from 'App/Models/Tag'
