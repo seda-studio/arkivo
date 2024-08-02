@@ -9,8 +9,6 @@ import Env from '@ioc:Adonis/Core/Env';
 let offset = 0;
 let limit = 100;
 
-const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
-
 export default class UpdateMetadata extends BaseCommand {
   /**
    * Command name is used to run the command
@@ -166,14 +164,10 @@ export async function createOrUpdateArtifact(artifact: Artifact, token: any) {
 
 
 async function makeGraphQLRequest(query: string) {
+
+  const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
+
   try {
-
-
-    // TODO: use .env variable for the endpoint
-    // alternative instance (Teia): https://teztok.teia.rocks/v1/graphql
-    // const response = await axios.post('https://teztok.teia.rocks/v1/graphql', {
-    // const response = await axios.post('https://graphiql.teztok.com/v1/graphql', {
-    // const response = await axios.post('http://192.168.1.33:8080/v1/graphql', {
     const response = await axios.post(teztok_endpoint, {
       query: query,
     });

@@ -9,8 +9,6 @@ import Tag from 'App/Models/Tag'
 let offset = 0;
 let limit = 100;
 
-const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
-
 function getQuery() {
 
   return `
@@ -187,12 +185,10 @@ export default class ArtifactsDiscover extends BaseCommand {
 
 
 async function makeGraphQLRequest(query: string) {
+
+  const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
+
   try {
-    // TODO: use .env variable for the endpoint
-    // alternative instance (Teia): https://teztok.teia.rocks/v1/graphql
-    // const response = await axios.post('https://teztok.teia.rocks/v1/graphql', {
-    // const response = await axios.post('https://graphiql.teztok.com/v1/graphql', {
-    // const response = await axios.post('http://192.168.1.33:8080/v1/graphql', {
     const response = await axios.post(teztok_endpoint, {
       query: query,
     });
@@ -210,14 +206,3 @@ async function makeGraphQLRequest(query: string) {
     console.error(error);
   }
 }
-
-
-
-
-
-/**
- * 
- * 
- * 
- * 
- */
