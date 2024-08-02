@@ -61,7 +61,10 @@ export default class ArtifactsController {
 
     public async show({ view, params }: HttpContextContract) {
         // const artifact = await Artifact.query().where('id', params.id).preload('tags').firstOrFail()
-        const artifact = await (await Artifact.findOrFail(params.id));
+        const artifact = await Artifact.query()
+                            .where('id', params.id)
+                            .preload('tags')
+                            .firstOrFail();
 
         artifact.artifactUri = getPlatformSpecificUri(artifact);
 
