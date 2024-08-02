@@ -1,6 +1,11 @@
 @layout('layouts/main')
 @section('body')
-    <h1>Artifacts</h1>
+
+<div class="container">
+    <form method="GET" action="/artifacts" class="d-flex justify-content-center mb-4">
+        <input type="text" name="search" value="{{ artifacts.searchQuery || '' }}" placeholder="Search artifacts..." class="form-control" style="width: 400px;">
+        <button type="submit" class="btn btn-primary ms-2">Search</button>
+    </form>
 
     <ul class="card-list">
         @each(artifact in artifacts)
@@ -14,4 +19,5 @@
         </li>
         @end
     </ul>
+</div>
 @end

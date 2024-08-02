@@ -6,13 +6,12 @@
         <iframe class='artifact-main' src="{{{ artifact.artifactUri }}}" sandbox="allow-scripts allow-same-origin allow-modals allow-pointer-lock" allow="accelerometer; camera; fullscreen; gyroscope; microphone; midi *; xr-spatial-tracking;"></iframe>
     </div>
 
-
     <div class="container-fluid text-center my-3">
         <p class="h3">{{ artifact.title }}</p>
         <p>{{ artifact.artistAlias ? artifact.artistAlias: artifact.artistAddress }}</p>
     </div>
 
-    <div class="container-fluid">
+    <div class="container">
         <div class="row">
           <div class="col">
             <div class="accordion" id="leftAccordion">
@@ -40,23 +39,23 @@
                             <tbody>
                                 <tr>
                                     <th scope="row">Blockchain</th>
-                                    <td>TODO</td>
+                                    <td><code>{{ artifact.chain }}</code></td>
                                 </tr>
                                 <tr>
                                     <th scope="row">Smart Contract</th>
-                                    <td>TODO</td>
+                                    <td><code>{{ artifact.contractAddress }}</code></td>
                                 </tr>
                                 <tr>
                                     <th scope="row">Platform</th>
-                                    <td>TODO</td>
+                                    <td><code>{{ artifact.platform }}</code></td>
                                 </tr>
                                 <tr>
                                     <th scope="row">Token ID</th>
-                                    <td>{{ artifact.tokenId }}</td>
+                                    <td><code>{{ artifact.tokenId }}</code></td>
                                 </tr>
                                 <tr>
                                   <th scope="row">Minted at</th>
-                                  <td>{{ artifact.mintedAt }}</td>
+                                  <td><code>{{ artifact.mintedAt }}</code></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -99,8 +98,14 @@
                   </h2>
                   <div id="collapseTags" class="accordion-collapse collapse" data-bs-parent="#rightAccordion">
                     <div class="accordion-body">
-                        Tags will appear here
-                    </div>
+                      <p>
+                          @each ((tag, index) in artifact.tags)
+                              <code>{{ tag.tag }}</code>
+                              @if(index < artifact.tags.length - 1)
+                              , 
+                              @end
+                          @end
+                      </p>
                   </div>
                 </div>
                 <div class="accordion-item">
@@ -135,7 +140,7 @@
         </div>
     </div>
 
-    <div class="container-fluid">
+    <div class="container">
         <div class="row my-3">
             <div class="col">
                 
@@ -157,5 +162,8 @@
             </div>
         </div>
     </div>
+
+
+    {{--  {{ inspect({ artifact }) }}  --}}
 
 @end
