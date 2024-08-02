@@ -18,19 +18,31 @@ export default class ArtifactsController {
 
         // check if it has a page parameter, and if not, send a redirect with the parameter
         if (!qs.page) {
-            Logger.warn('page argument not found in query string. Redirecting to page 1.');
-            response.redirect()
-            .withQs({ page: 1 })
-            .toPath('/artifacts');
+            qs.page = 1;
         }
 
-        Logger.warn('page argument found in query string: ' + qs.page);
-        
-        const artifacts = await Artifact.query()
-                            .where('isNetworked', true)
-                            .where('isBurned', false)
-                            .orderBy('minted_at', 'desc')
-                            .paginate(qs.page, 50)
+        const searchQuery = request.input('search')
+
+
+        let artifacts;
+
+        if (searchQuery) {
+            artifacts = await Artifact.query()
+                .where('title', 'ILIKE', `%${searchQuery}%`)
+                .orWhere('description', 'ILIKE', `%${searchQuery}%`)
+                .andWhere('isNetworked', true)
+                .andWhere('isBurned', false)
+                .orderBy('minted_at', 'desc')
+                .paginate(qs.page, 50)
+
+            artifacts.searchQuery = searchQuery;
+        } else {
+            artifacts = await Artifact.query()
+                .where('isNetworked', true)
+                .where('isBurned', false)
+                .orderBy('minted_at', 'desc')
+                .paginate(qs.page, 50)
+        }
 
 
         await Promise.all(artifacts.map(async (artifact) => {
@@ -40,9 +52,7 @@ export default class ArtifactsController {
             // populate artist alias
             await populateArtistAlias(artifact);
         }));
-        
 
-        
         return view.render('artifacts', { artifacts })
     }
 
@@ -75,7 +85,7 @@ export default class ArtifactsController {
         return view.render('artifact', { artifact })
     }
 
-    public async store({}: HttpContextContract) {
+    public async store({ }: HttpContextContract) {
         const artifact = new Artifact()
 
         artifact.chain = 'tezos'
@@ -100,8 +110,8 @@ export default class ArtifactsController {
 
 
         await artifact
-             .related('tags')
-             .attach(tags.map(tag => tag.id))
+            .related('tags')
+            .attach(tags.map(tag => tag.id))
 
         return artifact;
     }
@@ -112,7 +122,7 @@ export default class ArtifactsController {
         const contractAddress = request.input('contractAddress')
         const tokenId = request.input('tokenId')
 
-        if(chain && contractAddress && tokenId) {
+        if (chain && contractAddress && tokenId) {
 
             const artifact = await Artifact
                 .query()
@@ -122,24 +132,24 @@ export default class ArtifactsController {
                 .first()
 
             if (artifact) {
-            {
+                {
 
-                const payload: ProcessArtifactPayload = {
-                    operations: [ ProcessOperation.FETCH, ProcessOperation.PIN ],
-                    chain: chain,
-                    contractAddress: contractAddress,
-                    tokenId: tokenId
+                    const payload: ProcessArtifactPayload = {
+                        operations: [ProcessOperation.FETCH, ProcessOperation.PIN],
+                        chain: chain,
+                        contractAddress: contractAddress,
+                        tokenId: tokenId
+                    }
+
+
+                    Queue.dispatch('App/Jobs/ProcessArtifact', payload);
+                    return "Job queued OK";
                 }
-
-
-                Queue.dispatch('App/Jobs/ProcessArtifact',  payload);
-                return "Job queued OK";
             }
+
+            return "Not Found";
+
         }
-
-        return "Not Found";
-
-    }
 
     }
 }
@@ -148,17 +158,17 @@ export default class ArtifactsController {
 async function populateArtistAlias(artifact: Artifact) {
 
     let query = getArtistAliasQuery(artifact.artistAddress);
-            const response = await makeGraphQLRequest(query);
+    const response = await makeGraphQLRequest(query);
 
-            if (response && response.data && response.data.data && response.data.data.tzprofiles && response.data.data.tzprofiles.length > 0) {
+    if (response && response.data && response.data.data && response.data.data.tzprofiles && response.data.data.tzprofiles.length > 0) {
 
-                const alias = response.data.data.tzprofiles[0].alias;
+        const alias = response.data.data.tzprofiles[0].alias;
 
-                artifact.artistAlias = alias;
-            } else {
-                Logger.debug('No artist alias found for address: ' + artifact.artistAddress);
-                artifact.artistAlias = truncAddress(artifact.artistAddress);
-            }
+        artifact.artistAlias = alias;
+    } else {
+        Logger.debug('No artist alias found for address: ' + artifact.artistAddress);
+        artifact.artistAlias = truncAddress(artifact.artistAddress);
+    }
 
 }
 
@@ -181,50 +191,50 @@ function getArtistAliasQuery(address: string) {
             }
         }
     `;
-  }
+}
 
 
 async function makeGraphQLRequest(query: string) {
     try {
-      // TODO: use .env variable for the endpoint
-      // alternative instance (Teia): https://teztok.teia.rocks/v1/graphql
-      // const response = await axios.post('https://teztok.teia.rocks/v1/graphql', {
-      // const response = await axios.post('https://graphiql.teztok.com/v1/graphql', {
-      // const response = await axios.post('http://192.168.1.33:8080/v1/graphql', {
-      const response = await axios.post(teztok_endpoint, {
-        query: query,
-      });
-  
+        // TODO: use .env variable for the endpoint
+        // alternative instance (Teia): https://teztok.teia.rocks/v1/graphql
+        // const response = await axios.post('https://teztok.teia.rocks/v1/graphql', {
+        // const response = await axios.post('https://graphiql.teztok.com/v1/graphql', {
+        // const response = await axios.post('http://192.168.1.33:8080/v1/graphql', {
+        const response = await axios.post(teztok_endpoint, {
+            query: query,
+        });
 
-    //   console.log(query);
-  
-    //   console.log(JSON.stringify(response.data, null, 2));
 
-  
-  
-      // Handle the response data here
-      // this.logger.info('Indexer response: ' + response.data);
-  
-      return response;
+        //   console.log(query);
+
+        //   console.log(JSON.stringify(response.data, null, 2));
+
+
+
+        // Handle the response data here
+        // this.logger.info('Indexer response: ' + response.data);
+
+        return response;
     } catch (error) {
-      // Handle any errors that occur during the request
-      console.error(error);
+        // Handle any errors that occur during the request
+        console.error(error);
     }
-  }
+}
 
 
-  function getPlatformSpecificUri(artifact: Artifact) {
+function getPlatformSpecificUri(artifact: Artifact) {
     let stringUri = getWorkingUri(artifact.artifactUri);
 
     // turn workingUri into a URL object
     const url = new URL(stringUri);
 
-    if(artifact.platform == 'HEN') {
+    if (artifact.platform == 'HEN') {
         // add viwer and objkt query parameters
         url.searchParams.set('creator', artifact.artistAddress);
         url.searchParams.set('viewer', '');
         url.searchParams.set('objkt', artifact.tokenId);
     }
-    
+
     return url.toString();
-  }
+}
