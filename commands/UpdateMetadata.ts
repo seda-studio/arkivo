@@ -4,6 +4,7 @@ import Artifact from 'App/Models/Artifact'
 import Tag from 'App/Models/Tag'
 import Logger from '@ioc:Adonis/Core/Logger'
 import Env from '@ioc:Adonis/Core/Env';
+import Identity from 'App/Models/Identity'
 
 
 let offset = 0;
@@ -147,7 +148,7 @@ export async function createOrUpdateArtifact(artifact: Artifact, token: any) {
   artifact.isBurned = false
   artifact.isRestricted = false
 
-  if(artifact.editions == 0) {
+  if (artifact.editions == 0) {
     artifact.isBurned = true;
   }
 
@@ -160,6 +161,44 @@ export async function createOrUpdateArtifact(artifact: Artifact, token: any) {
     .related('tags')
     .sync(tags.map(tag => tag.id));
 
+
+  await createOrUpdateArtistProfile(artifact.artistAddress);
+
+}
+
+
+export async function createOrUpdateArtistProfile(address: string) {
+
+  Logger.info('Updating artist profile: ' + address)
+
+  let artist = await Identity.query()
+    .where('account', address)
+    .first();
+
+    if (!artist) {
+      artist = new Identity();
+    }
+
+  const response = await makeGraphQLRequest(getArtistProfileData(address));
+
+  if (response && response.data && response.data.data && response.data.data.tzprofiles && response.data.data.tzprofiles.length > 0) {
+
+    const profile = response.data.data.tzprofiles[0];
+
+    artist.account = profile.account;
+    artist.alias = profile.alias;
+    artist.description = profile.description;
+    artist.discord = profile.discord;
+    artist.domainName = profile.domain_name;
+    artist.ethereum = profile.ethereum;
+    artist.github = profile.github;
+    artist.logo = profile.logo;
+    artist.twitter = profile.twitter;
+    artist.website = profile.website;
+
+    await artist.save();
+    
+  }
 }
 
 
@@ -236,4 +275,24 @@ function getGraphQLTeiaByTokenId(tokenId: string) {
       }
     }
     `
+};
+
+function getArtistProfileData(address: string) {
+
+  return `
+  query artistInfo($address: String = "${address}") {
+        tzprofiles(where: {account: {_eq: $address}}) {
+              account
+              alias
+              description
+              discord
+              domain_name
+              ethereum
+              github
+              logo
+              twitter
+              website
+          }
+      }
+  `
 };

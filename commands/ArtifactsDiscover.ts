@@ -5,6 +5,7 @@ import axios from 'axios'
 import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
 import Artifact from 'App/Models/Artifact'
 import Tag from 'App/Models/Tag'
+import { createOrUpdateArtistProfile } from './UpdateMetadata';
 
 let offset = 0;
 let limit = 100;
@@ -105,6 +106,7 @@ export default class ArtifactsDiscover extends BaseCommand {
             const artifact = new Artifact()
 
             await this.createOrUpdateArtifact(artifact, tokenData);
+            await createOrUpdateArtistProfile(artifact.artistAddress);
 
             if(this.pin || this.snapshot) {
               let ops: ProcessOperation[] = [];
