@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Artifact from 'App/Models/Artifact'
+import Identity from 'App/Models/Identity'
 import Tag from 'App/Models/Tag'
 import Env from '@ioc:Adonis/Core/Env'
 import { Queue } from '@ioc:Rlanz/Queue';
@@ -29,9 +30,16 @@ export default class ArtifactsController {
         if (searchQuery) {
             const normalizedSearchQuery = normalizeString(searchQuery);
 
+            const artist = await Identity.query()
+                .whereRaw('normalize(alias, NFKD) ILIKE ?', [`%${normalizedSearchQuery}%`])
+                .first();
+
+            const artistAddress = artist ? artist.account : '';
+        
             artifacts = await Artifact.query()
                 .whereRaw('normalize(title, NFKD) ILIKE ?', [`%${normalizedSearchQuery}%`])
                 .orWhereRaw('normalize(description, NFKD) ILIKE ?', [`%${normalizedSearchQuery}%`])
+                .orWhere('artistAddress', artistAddress)
                 // .andWhere('isNetworked', true)
                 .andWhere('isBurned', false)
                 .orderBy('minted_at', 'desc')
