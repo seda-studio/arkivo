@@ -162,7 +162,7 @@ export async function createOrUpdateArtifact(artifact: Artifact, token: any) {
     .sync(tags.map(tag => tag.id));
 
 
-  await createOrUpdateArtistProfile(token.artist_address);
+  await createOrUpdateArtistProfile(artifact.artistAddress);
 
 }
 

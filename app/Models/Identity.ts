@@ -19,7 +19,7 @@ export default class Identity extends BaseModel {
   public discord: string
 
   @column()
-  public domain_name: string
+  public domainName: string
 
   @column()
   public ethereum: string
