@@ -43,7 +43,7 @@ services:
       - 5001:5001
       
       # HTTP Gateway
-      - 8080:8080
+      - 8081:8080
 
   app:
     container_name: arkivo_app
@@ -59,6 +59,7 @@ services:
     ports:
       - ${PORT}:${PORT}
       - 9229:9229
+      - 8080:8080
     env_file:
       - .env
     environment:
@@ -66,7 +67,7 @@ services:
       - REDIS_HOST=redis
     volumes:
       - ./:/home/node/app
-    command: dumb-init node ace serve --watch --node-args="--inspect=0.0.0.0"
+    command: dumb-init node ace serve --watch --encore-args="--host 0.0.0.0 --port 8080 --public localhost:8080"
 
   worker-ipfs:
     container_name: arkivo_worker_ipfs
