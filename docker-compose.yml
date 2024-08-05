@@ -76,7 +76,7 @@ services:
       - redis
     build:
       context: .
-      dockerfile: ./docker/worker/Dockerfile
+      dockerfile: ./docker/worker-ipfs/Dockerfile
       target: dependencies
     env_file:
       - .env
@@ -96,7 +96,7 @@ services:
       - redis
     build:
       context: .
-      dockerfile: ./docker/worker/Dockerfile
+      dockerfile: ./docker/worker-snapshot/Dockerfile
       target: dependencies
     env_file:
       - .env
