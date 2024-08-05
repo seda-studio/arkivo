@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, HasMany, hasMany, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
 import Tag from 'App/Models/Tag'
 import Snapshot from 'App/Models/Snapshot'
+import Origin from 'App/Models/Origin'
 
 export default class Artifact extends BaseModel {
   @column({ isPrimary: true })
@@ -80,4 +81,7 @@ export default class Artifact extends BaseModel {
 
   @hasMany(() => Snapshot)
   public snapshots: HasMany<typeof Snapshot>
+
+  @manyToMany(() => Origin)
+  public origins: ManyToMany<typeof Origin>
 }

@@ -1,9 +1,16 @@
 import Env from '@ioc:Adonis/Core/Env'
 import { chromium, ConsoleMessage, Request, Response } from 'playwright';
 import Artifact from 'App/Models/Artifact'
+import Origin from 'App/Models/Origin'
 import { URL } from 'url';
 import { ISnapshotDataV1, HttpType } from 'App/Models/interfaces/SnapshotDataV1';
 
+
+interface IOrigin {
+    scheme: string;
+    domain: string;
+    port: number;
+}
 
 const ipfsGateway = Env.get('IPFS_GATEWAY')
 const ipfsGatewayHost = new URL(ipfsGateway).hostname;
@@ -11,6 +18,9 @@ const ipfsGatewayHost = new URL(ipfsGateway).hostname;
 export default class SnapshotArtifactService {
     snapshotData: ISnapshotDataV1;
     extNetCalls: boolean = false;
+    dryRun: boolean = false;
+
+    extOrigins: IOrigin[] = [];
 
     constructor() {
         this.snapshotData = {
@@ -32,7 +42,7 @@ export default class SnapshotArtifactService {
         };
     }
 
-    async snapshot(artifact: Artifact): Promise<void> {
+    async snapshot(artifact: Artifact, dryRun: boolean): Promise<void> {
 
         // populate artifact info in snapshot data
         this.snapshotData.artifact.chain = artifact.chain;
@@ -41,7 +51,6 @@ export default class SnapshotArtifactService {
         this.snapshotData.artifact.title = artifact.title;
         this.snapshotData.artifact.description = artifact.description || '';
         this.snapshotData.artifact.artist = artifact.artistAddress;
-        
 
         // strip ipfs prefix from url
         let url = artifact.artifactUri;
@@ -68,16 +77,32 @@ export default class SnapshotArtifactService {
         const buffer = await page.screenshot();
         this.snapshotData.snapshot.screenshot = buffer.toString('base64');
 
-        await artifact.related('snapshots').create({
-            version: this.snapshotData.version,
-            data: this.snapshotData
-        });
+        console.log('extOrigins:', this.extOrigins);
 
-        // update artifact networked status if necessary
-        if (!artifact.isNetworked && this.extNetCalls) {
-            console.log(`Artifact ${artifact.id} is networked`);
-            artifact.isNetworked = true;
-            await artifact.save();
+        if(!dryRun) {
+            await artifact.related('snapshots').create({
+                version: this.snapshotData.version,
+                data: this.snapshotData
+            });
+
+            // update artifact networked status if necessary
+            if (!artifact.isNetworked && this.extNetCalls) {
+                console.log(`Artifact ${artifact.id} is networked`);
+                artifact.isNetworked = true;
+                await artifact.save();
+            }
+
+            // create or update origins
+            const origins = await Origin.updateOrCreateMany(['scheme','domain','port'], this.extOrigins);
+
+
+            await artifact
+                .related('origins')
+                .sync(origins.map(origin => origin.id));
+
+
+        } else {
+            console.log('Dry run enabled. Skipping snapshot creation and artifact update');
         }
 
         // playwright cleanup
@@ -101,7 +126,10 @@ export default class SnapshotArtifactService {
     }
 
     private processRequest(request: Request) {
-        const url = new URL(request.url());        
+        const url = new URL(request.url());
+
+        // remove the trailing : from the protocol (https://developer.mozilla.org/en-US/docs/Web/API/URL/protocol)
+        const protocol = url.protocol.replace(':', '');
 
         // check if the request is different from the ipfs gateway (potentially external call)
         // and not a blob request (since blob calls result in different hostnames but are not external calls)
@@ -110,6 +138,12 @@ export default class SnapshotArtifactService {
 
         if (external) {
             this.extNetCalls = true;
+
+            this.extOrigins.push({
+                scheme: protocol,
+                domain: url.hostname,
+                port: url.port ? parseInt(url.port) : (protocol === 'https' ? 443 : 80)
+            });
         }
 
         let postData = request.postData();

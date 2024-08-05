@@ -21,6 +21,7 @@ export type ProcessArtifactPayload = {
   chain: string,
   contractAddress: string,
   tokenId: string,
+  params?: { [key: string]: any }
 }
 
 export default class ProcessArtifact implements JobHandlerContract {
@@ -73,7 +74,7 @@ export default class ProcessArtifact implements JobHandlerContract {
               break;
             case ProcessOperation.SNAPSHOT:
               ProcessArtifact.snapshotHandleCount++;
-              await opSnapshot(artifact);
+              await opSnapshot(artifact, payload.params);
 
               if (ProcessArtifact.snapshotHandleCount >= MAX_SNAPSHOT_HANDLES_BEFORE_EXIT) {
                 console.log('Snapshot Handle function called ' + MAX_SNAPSHOT_HANDLES_BEFORE_EXIT + ' times. Exiting...');
@@ -132,11 +133,18 @@ function opUnpin(artifact: Artifact) {
   console.warn(`ProcessArtifact: opUnpin not implemented yet: `, artifact);
 }
 
-async function opSnapshot(artifact: Artifact) {
-  console.log(`ProcessArtifact: snapshotting artifact ${artifact.artifactUri}`);
+async function opSnapshot(artifact: Artifact, params: { [key: string]: any } = {}) {
+
+  const dryRun = params && params.dryRun ? params.dryRun : false;
+  
+  if (dryRun) {
+    console.log(`ProcessArtifact: DRY-RUN snapshotting artifact ${artifact.artifactUri}`);
+  } else {
+    console.log(`ProcessArtifact: snapshotting artifact ${artifact.artifactUri}`);
+  }
 
   const snapshotService = new SnapshotArtifactService()
-  await snapshotService.snapshot(artifact)
+  await snapshotService.snapshot(artifact, dryRun)
 
 }
 
