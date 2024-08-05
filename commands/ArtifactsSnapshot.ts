@@ -19,13 +19,14 @@ export default class ArtifactsSnapshot extends BaseCommand {
   @args.string({ description: 'Token Id' })
   public token_id: string
 
-  @flags.boolean({ alias: 'a', description: 'Snapshot all artifacts' })
+  @flags.boolean({ alias: 'a', description: 'Snapshot all artifacts. Use token 0' })
   public all: boolean
 
   @flags.boolean({ alias: 'd', description: 'Dry-run only. Do not save to DB.' })
   public dryRun: boolean
 
   /**
+   *
    * Command description is displayed in the "help" output
    */
   public static description = 'Take a snapshot of an artifact'
