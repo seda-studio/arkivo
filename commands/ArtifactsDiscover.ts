@@ -30,6 +30,7 @@ function getQuery() {
       fa2_address
       platform
       minted_at
+      editions
     }
   }
 
@@ -147,6 +148,7 @@ export default class ArtifactsDiscover extends BaseCommand {
   }
 
 
+  // TODO: this code is duplicated in UpdateMetadata.ts (FIX IT)
   private async createOrUpdateArtifact(artifact: Artifact, token: any) {
 
     artifact.chain = "tezos"
@@ -163,11 +165,16 @@ export default class ArtifactsDiscover extends BaseCommand {
     artifact.mimeType = token.mime_type
     artifact.mintedAt = token.minted_at
     artifact.artifactSize = 0
+    artifact.editions = token.editions
     artifact.isFetched = false
     artifact.isPinned = false
     artifact.isNetworked = false
     artifact.isBurned = false
     artifact.isRestricted = false
+  
+    if (artifact.editions == 0) {
+      artifact.isBurned = true;
+    }
 
     await artifact.save()
 
