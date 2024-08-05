@@ -40,7 +40,7 @@ export default class ArtifactsController {
                 .whereRaw('normalize(title, NFKD) ILIKE ?', [`%${normalizedSearchQuery}%`])
                 .orWhereRaw('normalize(description, NFKD) ILIKE ?', [`%${normalizedSearchQuery}%`])
                 .orWhere('artistAddress', artistAddress)
-                // .andWhere('isNetworked', true)
+                .andWhere('isNetworked', true)
                 .andWhere('isBurned', false)
                 .orderBy('minted_at', 'desc')
                 .paginate(qs.page, 50)
@@ -48,7 +48,7 @@ export default class ArtifactsController {
             artifacts.searchQuery = searchQuery;
         } else {
             artifacts = await Artifact.query()
-                // .where('isNetworked', true)
+                .where('isNetworked', true)
                 .where('isBurned', false)
                 .orderBy('minted_at', 'desc')
                 .paginate(qs.page, 50)
@@ -72,6 +72,7 @@ export default class ArtifactsController {
         const artifact = await Artifact.query()
                             .where('id', params.id)
                             .preload('tags')
+                            .preload('snapshots')
                             .firstOrFail();
 
         artifact.artifactUri = getPlatformSpecificUri(artifact);

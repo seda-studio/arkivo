@@ -22,6 +22,9 @@ export default class ArtifactsSnapshot extends BaseCommand {
   @flags.boolean({ alias: 'a', description: 'Snapshot all artifacts' })
   public all: boolean
 
+  @flags.boolean({ alias: 'd', description: 'Dry-run only. Do not save to DB.' })
+  public dryRun: boolean
+
   /**
    * Command description is displayed in the "help" output
    */
@@ -62,6 +65,10 @@ export default class ArtifactsSnapshot extends BaseCommand {
             tokenId: artifact.tokenId
           }
 
+          if(this.dryRun) {
+            payload.params = { "dryRun": true }
+          }
+
           await Queue.dispatch('App/Jobs/ProcessArtifact', payload, {queueName: QUEUE_SNAPSHOT});
           this.logger.info('Token sent for processing: ' + artifact.chain + ' / ' + artifact.contractAddress + ' / ' + artifact.tokenId);
         }
@@ -87,6 +94,10 @@ export default class ArtifactsSnapshot extends BaseCommand {
           chain: artifact.chain,
           contractAddress: artifact.contractAddress,
           tokenId: artifact.tokenId
+        }
+
+        if(this.dryRun) {
+          payload.params = { "dryRun": true }
         }
 
         await Queue.dispatch('App/Jobs/ProcessArtifact', payload, {queueName: QUEUE_SNAPSHOT});
