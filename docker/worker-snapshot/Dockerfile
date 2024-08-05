@@ -1,11 +1,12 @@
 # stage 1 - base
 
-ARG NODE_IMAGE=node:16.13.1-alpine
+ARG NODE_IMAGE=node:20-bookworm
 
 FROM $NODE_IMAGE AS base
-RUN apk --no-cache add dumb-init
+RUN apt-get update && apt-get install -y dumb-init && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /home/node/app && chown node:node /home/node/app
 WORKDIR /home/node/app
+RUN npx -y playwright@1.45.1 install --with-deps
 USER node
 RUN mkdir tmp
 
@@ -15,6 +16,7 @@ FROM base AS dependencies
 COPY --chown=node:node ./package*.json ./
 RUN npm ci
 COPY --chown=node:node . .
+RUN npx playwright install
 
 # stage 3 - build
 
@@ -30,9 +32,6 @@ ENV NODE_ENV=production
 COPY --chown=node:node ./package*.json ./
 RUN npm ci --production
 COPY --chown=node:node --from=build /home/node/app/build .
-
-RUN npx playwright install
-RUN npx playwright install-deps
 
 # EXPOSE $PORT
 CMD [ "dumb-init", "node", "server.js" ]
