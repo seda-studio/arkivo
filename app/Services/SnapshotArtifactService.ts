@@ -12,15 +12,25 @@ interface IOrigin {
     port: number;
 }
 
-const ipfsGateway = Env.get('IPFS_GATEWAY')
-const ipfsGatewayHost = new URL(ipfsGateway).hostname;
+const IPFS_GATEWAY = Env.get('IPFS_GATEWAY')
+const IPFS_GATEWAY_HOST = new URL(IPFS_GATEWAY).hostname;
+const SNAPSHOT_DURATION = 5000;
 
 export default class SnapshotArtifactService {
     snapshotData: ISnapshotDataV1;
     extNetCalls: boolean = false;
     dryRun: boolean = false;
 
-    extOrigins: IOrigin[] = [];
+    extOriginsMap: Map<string, IOrigin> = new Map();
+
+    getOrigins(): IOrigin[] {
+        return Array.from(this.extOriginsMap.values());
+      }
+    
+    addOrigin(origin: IOrigin): void {
+        const key = JSON.stringify(origin);
+        this.extOriginsMap.set(key, origin);
+    }
 
     constructor() {
         this.snapshotData = {
@@ -71,13 +81,13 @@ export default class SnapshotArtifactService {
         await page.goto(pageUrl);
 
         // Wait a few seconds
-        await page.waitForTimeout(30000);
+        await page.waitForTimeout(SNAPSHOT_DURATION);
 
         // capture screenshot
         const buffer = await page.screenshot();
         this.snapshotData.snapshot.screenshot = buffer.toString('base64');
 
-        console.log('extOrigins:', this.extOrigins);
+        console.log('extOrigins:', this.getOrigins());
 
         if(!dryRun) {
             await artifact.related('snapshots').create({
@@ -93,7 +103,7 @@ export default class SnapshotArtifactService {
             }
 
             // create or update origins
-            const origins = await Origin.updateOrCreateMany(['scheme','domain','port'], this.extOrigins);
+            const origins = await Origin.updateOrCreateMany(['scheme','domain','port'], this.getOrigins());
 
 
             await artifact
@@ -134,16 +144,18 @@ export default class SnapshotArtifactService {
         // check if the request is different from the ipfs gateway (potentially external call)
         // and not a blob request (since blob calls result in different hostnames but are not external calls)
         // if both checks pass, mark the artifact as networked
-        const external = (url.hostname != ipfsGatewayHost) && !(url.protocol.startsWith('blob'));
+        const external = (url.hostname != IPFS_GATEWAY_HOST) && !(url.protocol.startsWith('blob'));
 
         if (external) {
             this.extNetCalls = true;
 
-            this.extOrigins.push({
+            this.addOrigin({
                 scheme: protocol,
                 domain: url.hostname,
                 port: url.port ? parseInt(url.port) : (protocol === 'https' ? 443 : 80)
             });
+
+
         }
 
         let postData = request.postData();
@@ -176,10 +188,10 @@ export default class SnapshotArtifactService {
 
         const url = new URL(response.url());
 
-        const external = url.hostname != ipfsGatewayHost;
+        const external = url.hostname != IPFS_GATEWAY_HOST;
 
         // only capture response body from external network calls
-        if (url.hostname != ipfsGatewayHost) {
+        if (url.hostname != IPFS_GATEWAY_HOST) {
 
             try {
                 body = (await response.body()).toString(); // Convert Buffer to string
@@ -208,7 +220,7 @@ export default class SnapshotArtifactService {
     private formatPlatformUrl(artifact: Artifact, urlStr: string): string {
 
         urlStr = urlStr.replace('ipfs://', '');
-        urlStr = `${ipfsGateway}/${urlStr}`;
+        urlStr = `${IPFS_GATEWAY}/${urlStr}`;
 
         const url = new URL(urlStr);
 
