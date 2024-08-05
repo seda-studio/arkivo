@@ -90,25 +90,24 @@
           <div class="col">
             
             <div class="accordion" id="rightAccordion">
-                <div class="accordion-item">
-                  <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTags" aria-expanded="false" aria-controls="collapseTags">
-                      Tags
-                    </button>
-                  </h2>
-                  <div id="collapseTags" class="accordion-collapse collapse" data-bs-parent="#rightAccordion">
-                    <div class="accordion-body">
-                      <p>
-                          @each ((tag, index) in artifact.tags)
-                              <code>{{ tag.tag }}</code>
-                              @if(index < artifact.tags.length - 1)
-                              , 
-                              @end
-                          @end
-                      </p>
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTags" aria-expanded="false" aria-controls="collapseTags">
+                    Tags
+                  </button>
+                </h2>
+                <div id="collapseTags" class="accordion-collapse collapse" data-bs-parent="#rightAccordion">
+                  <div class="accordion-body">
+                    @each ((tag, index) in artifact.tags)
+                      <code>{{ tag.tag }}</code>
+                      @if(index < artifact.tags.length - 1)
+                        , 
+                      @end
+                    @end
                   </div>
                 </div>
-                <div class="accordion-item">
+              </div>
+              <div class="accordion-item">
                   <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClassification" aria-expanded="false" aria-controls="collapseClassification">
                         Classification
@@ -134,7 +133,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </div>  
             </div>
           </div>
         </div>
@@ -153,7 +152,21 @@
                       </h2>
                       <div id="collapseSnapshots" class="accordion-collapse collapse" data-bs-parent="#snapshotsAccordion">
                         <div class="accordion-body">
-                            TODO
+                          <div>
+                            <p>test</p>
+                                @each((snapshot, index) in artifact.snapshots)
+                                    <!-- create a list of snapshots, just showing the timestamp for now -->
+                                    <h5 class="card-title text-center">{{ snapshot.data.title }}</h5>
+                                    <p>{{ snapshot.data.version }}</p>
+                                    <p>{{ snapshot.data.timestamp }}</p>
+                                    <p>External calls:</p>
+                                    @each((net, index) in snapshot.data.snapshot.net)
+                                      @if(net.type == 1 && net.external)
+                                        <p>{{ net.data.url }}</p>
+                                      @end
+                                    @end
+                                @end
+                            </div>
                         </div>
                       </div>
                     </div>
