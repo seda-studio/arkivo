@@ -10,7 +10,8 @@
     "dockerAttach": "docker exec -it arkivo_app /bin/sh",
     "dockerAttachPostgres": "docker exec -it arkivo_db /bin/sh",
     "dockerMigrateRun": "docker exec arkivo_app /bin/sh -c \"node ace migration:run\"",
-    "dockerMigrateReset": "docker exec arkivo_app /bin/sh -c \"node ace migration:reset\""
+    "dockerMigrateReset": "docker exec arkivo_app /bin/sh -c \"node ace migration:reset\"",
+    "dockerTeiaDiscovery": "docker exec arkivo_app /bin/sh -c \"node ace artifacts:discover teia -p -s\""
   },
   "devDependencies": {
     "@adonisjs/assembler": "^5.9.5",
