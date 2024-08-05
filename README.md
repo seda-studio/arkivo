@@ -1,8 +1,11 @@
 # arkivo
 conservation of networked cryptoart
 
-# Requirements: node, npm, docker, docker compose
+## Requirements:
 
+node, npm, docker, docker compose
+
+## Installation:
 
 1. clone repo
 
