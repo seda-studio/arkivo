@@ -68,8 +68,8 @@ services:
       - ./:/home/node/app
     command: dumb-init node ace serve --watch --node-args="--inspect=0.0.0.0"
 
-  worker:
-    container_name: arkivo_worker
+  worker-ipfs:
+    container_name: arkivo_worker_ipfs
     restart: always
     depends_on:
       - postgres
@@ -85,7 +85,27 @@ services:
       - REDIS_HOST=redis
     volumes:
       - ./:/home/node/app
-    command: dumb-init node ace queue:listen
+    command: dumb-init node ace queue:listen --queue=ipfs
+
+
+  worker-snapshot:
+    container_name: arkivo_worker_snapshot
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    build:
+      context: .
+      dockerfile: ./docker/worker/Dockerfile
+      target: dependencies
+    env_file:
+      - .env
+    environment:
+      - PG_HOST=postgres
+      - REDIS_HOST=redis
+    volumes:
+      - ./:/home/node/app
+    command: dumb-init node ace queue:listen --queue=snapshot
 
 
 
