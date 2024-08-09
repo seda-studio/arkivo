@@ -143,7 +143,7 @@ export async function createOrUpdateArtifact(artifact: Artifact, token: any) {
   artifact.artistAddress = token.artist_address
   artifact.mimeType = token.mime_type
   artifact.mintedAt = token.minted_at
-  artifact.artifactSize = 0
+  // artifact.artifactSize = 0         // This field is not present in indexer, but populated by pinning operation. Do not override it.
   artifact.editions = token.editions
   artifact.isBurned = false
   artifact.isRestricted = false

@@ -45,7 +45,15 @@
       "description": "Fetches and Pins already existing artifacts records",
       "args": [],
       "aliases": [],
-      "flags": []
+      "flags": [
+        {
+          "name": "all",
+          "propertyName": "all",
+          "type": "boolean",
+          "alias": "f",
+          "description": "Force pin all artifacts"
+        }
+      ]
     },
     "artifacts:snapshot": {
       "settings": {
@@ -85,7 +93,7 @@
           "propertyName": "all",
           "type": "boolean",
           "alias": "a",
-          "description": "Snapshot all artifacts"
+          "description": "Snapshot all artifacts. Use token 0"
         },
         {
           "name": "dry-run",

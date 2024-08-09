@@ -1,4 +1,4 @@
-import { BaseCommand } from '@adonisjs/core/build/standalone'
+import { BaseCommand, flags } from '@adonisjs/core/build/standalone'
 import { Queue } from '@ioc:Rlanz/Queue';
 import Env from '@ioc:Adonis/Core/Env'
 import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
@@ -8,6 +8,9 @@ export default class ArtifactPin extends BaseCommand {
    * Command name is used to run the command
    */
   public static commandName = 'artifacts:pin'
+
+  @flags.boolean({ alias: 'f', description: 'Force pin all artifacts' })
+  public all: boolean
 
   /**
    * Command description is displayed in the "help" output
@@ -36,9 +39,15 @@ export default class ArtifactPin extends BaseCommand {
 
     const { default: Artifact } = await import ('App/Models/Artifact')
 
-    const artifacts = await Artifact.query()
-      .where('is_fetched ', false)
-      .andWhere('is_pinned', false);
+    let artifacts;
+    
+    if(this.all) {
+      artifacts = await Artifact.query();
+    } else {
+      artifacts = await Artifact.query()
+        .where('is_fetched ', false)
+        .andWhere('is_pinned', false);
+    }
 
       // for each result, dispatch a job to process the artifact
 
