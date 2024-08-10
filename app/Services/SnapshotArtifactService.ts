@@ -14,7 +14,7 @@ interface IOrigin {
 
 const IPFS_GATEWAY = Env.get('IPFS_GATEWAY')
 const IPFS_GATEWAY_HOST = new URL(IPFS_GATEWAY).hostname;
-const SNAPSHOT_DURATION = 5000;
+const SNAPSHOT_DURATION = 10000;
 
 export default class SnapshotArtifactService {
     snapshotData: ISnapshotDataV1;
