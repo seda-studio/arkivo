@@ -16,6 +16,9 @@ const IPFS_GATEWAY = Env.get('IPFS_GATEWAY')
 const IPFS_GATEWAY_HOST = new URL(IPFS_GATEWAY).hostname;
 const SNAPSHOT_DURATION = 10000;
 
+const DEFAULT_VIEWPORT_WIDTH = 2000;
+const DEFAULT_VIEWPORT_HEIGHT = 2000;
+
 export default class SnapshotArtifactService {
     snapshotData: ISnapshotDataV1;
     extNetCalls: boolean = false;
@@ -47,7 +50,16 @@ export default class SnapshotArtifactService {
             snapshot: {
                 net: [],
                 consoleMessages: [],
-                screenshot: ''
+                screenshot: '',
+                screenshotDelay: SNAPSHOT_DURATION,
+                viewport: {
+                    width: 0,
+                    height: 0
+                },
+                browser: {
+                    name: '',
+                    version: ''
+                }
             }
         };
     }
@@ -70,8 +82,24 @@ export default class SnapshotArtifactService {
 
         console.log(`Attempting to snapshot IPFS URI: ${pageUrl}`);
         const browser = await chromium.launch();
-        const context = await browser.newContext();
-        const page = await browser.newPage();
+        const context = await browser.newContext({
+            viewport: { width: DEFAULT_VIEWPORT_WIDTH,
+                        height: DEFAULT_VIEWPORT_HEIGHT
+                      }
+        });
+
+        const browserName = browser.browserType().name();
+        const browserVersion = browser.version();
+
+        this.snapshotData.snapshot.browser.name = browserName;
+        this.snapshotData.snapshot.browser.version = browserVersion;
+        this.snapshotData.snapshot.viewport.width = DEFAULT_VIEWPORT_WIDTH;
+        this.snapshotData.snapshot.viewport.height = DEFAULT_VIEWPORT_HEIGHT;
+
+        console.log(`Browser: ${browserName} - ${browserVersion}`);
+
+        
+        const page = await context.newPage();
 
         // Subscribe to 'request' and 'response' events.
         page.on('request', (request: Request) => this.processRequest(request));
@@ -84,7 +112,8 @@ export default class SnapshotArtifactService {
         await page.waitForTimeout(SNAPSHOT_DURATION);
 
         // capture screenshot
-        const buffer = await page.screenshot();
+        const buffer = await page.screenshot({fullPage: true});
+        await page.screenshot({ path: 'screenshot.png', fullPage: true });
         this.snapshotData.snapshot.screenshot = buffer.toString('base64');
 
         console.log('extOrigins:', this.getOrigins());

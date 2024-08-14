@@ -52,5 +52,14 @@ export interface ISnapshotDataV1 {
         net: INetworkData[];
         consoleMessages: IConsoleMessage[];
         screenshot: string; // base64
+        screenshotDelay: number;
+        viewport: {
+            width: number;
+            height: number;
+        };
+        browser: {
+            name: string;
+            version: string;
+        };
     }
 }

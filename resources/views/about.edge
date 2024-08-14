@@ -1,0 +1,50 @@
+@layout('layouts/main')
+@section('body')
+
+  <main>
+    <div>
+      <h1 class="title">arkivo.art</h1>
+      <p class="subtitle">
+        archive of network-interactive and evolving crypto-art
+      </p>
+
+      <p>
+        <strong>disclaimer: this is an early alpha release and is under heavy construction</strong>
+      </p>
+
+      <p>
+        Goals of this project
+      <p>
+      <ul>
+        <li>
+          To identify and catalogue all network-interactive and other evolving crypto-artworks.
+        </li>
+
+        <li>
+          To take regular snapshots of evolving artworks, including any network / API calls performed by the artwork during a snapshot.
+        </li>
+
+        <li>
+          To scan interactive (code-based) artworks for potential vulnerabilities or malicious code.
+        </li>
+
+        <li>
+          To document artworks as to aid in future conservation and restoration efforts.
+        </li>
+
+        <li>
+          To apply restoration techniques to artworks which may have ceased to function as intended by the artist.
+        </li>
+
+        <li>
+          This application is running in <strong>{{ process.env.NODE_ENV }}</strong> mode.
+        </ul>
+
+        <p>
+          Note: currently this project only catalogs OBJKTs minted on the HEN smart contract. The scope of the catalog will increase over time.
+        <p>
+
+    </div>
+  </main>
+
+  @end

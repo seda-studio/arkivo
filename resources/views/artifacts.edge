@@ -10,8 +10,8 @@
     <ul class="card-list">
         @each(artifact in artifacts)
         <li class="card">
-            <a class="card-image" href="/artifacts/{{ artifact.id }}">
-                <img loading="lazy" src="{{ artifact.thumbnailUri }}" alt="{{ artifact.title }}">
+            <a class="card-image" href="/artifacts/{{ artifact.id }}" style="background: url('/images/loading.gif') center center no-repeat; background-size: contain;">
+                <img loading="lazy" src="{{ artifact.thumbnailUri }}" alt="{{ artifact.title }}" onload="this.parentElement.style.background='none';">
             </a>
                 <h2>{{ artifact.artistAlias }}</h2>
                 <p>{{ artifact.title }}</p>
@@ -19,5 +19,24 @@
         </li>
         @end
     </ul>
+
+    <div class="pagination-container" style="text-align: center;">
+        @if(artifacts.currentPage > 1)
+            <a href="/artifacts?page=1" class="btn btn-primary">First</a>
+            <a href="/artifacts?page={{ artifacts.currentPage - 1 }}" class="btn btn-primary">Previous</a>
+        @endif
+
+        <span class="current-page" style="font-weight: bold; margin: 0 10px;">{{ artifacts.currentPage }}</span>
+
+        @if(artifacts.currentPage < artifacts.lastPage)
+            <a href="/artifacts?page={{ artifacts.currentPage + 1 }}" class="btn btn-primary">Next</a>
+            <a href="/artifacts?page={{ artifacts.lastPage }}" class="btn btn-primary">Last</a>
+        @endif
+    </div>
+     
 </div>
+
+
+{{--  {{ inspect({ artifacts }) }}   --}}
+    
 @end

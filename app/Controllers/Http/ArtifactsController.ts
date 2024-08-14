@@ -43,7 +43,7 @@ export default class ArtifactsController {
                // .andWhere('isNetworked', true)
                 .andWhere('isBurned', false)
                 .orderBy('minted_at', 'desc')
-                .paginate(qs.page, 50)
+                .paginate(qs.page, 9)
 
             artifacts.searchQuery = searchQuery;
         } else {
@@ -51,13 +51,21 @@ export default class ArtifactsController {
                // .where('isNetworked', true)
                 .where('isBurned', false)
                 .orderBy('minted_at', 'desc')
-                .paginate(qs.page, 50)
+                .paginate(qs.page, 9)
         }
 
 
         await Promise.all(artifacts.map(async (artifact) => {
+
+
             artifact.artifactUri = getWorkingUri(artifact.artifactUri);
-            artifact.thumbnailUri = getWorkingUri(artifact.thumbnailUri);
+
+            if (artifact.mimeType == 'image/svg+xml') {
+                artifact.thumbnailUri = "/images/svg-placeholder.png";
+            }
+            else {
+                artifact.thumbnailUri = getWorkingUri(artifact.thumbnailUri);
+            }
 
             // populate artist alias
             await populateArtistAlias(artifact);

@@ -154,7 +154,7 @@
                         <div class="accordion-body">
                           <div>
                             <p>test</p>
-                                @each((snapshot, index) in artifact.snapshots)
+                                @each((snapshot, index) in artifact.snapshots.reverse())
                                     <!-- create a list of snapshots, just showing the timestamp for now -->
                                     <h5 class="card-title text-center">{{ snapshot.data.title }}</h5>
                                     <p>{{ snapshot.data.version }}</p>
@@ -162,9 +162,15 @@
                                     <p>External calls:</p>
                                     @each((net, index) in snapshot.data.snapshot.net)
                                       @if(net.type == 1 && net.external)
-                                        <p>{{ net.data.url }}</p>
+                                        <p>{{ net.data.url }}</p>                                        
                                       @end
                                     @end
+
+                                    <img id = 'screen{{index}}' src = 'data:image/png;base64,{{ snapshot.data.snapshot.screenshot }}' alt="Snapshot Image" style="display: none;">
+
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#screenshotModal" onclick="document.getElementById('modalImage').src = document.getElementById('screen{{index}}').src">
+                                      Screenshot
+                                    </button>
                                 @end
                             </div>
                         </div>
@@ -174,6 +180,27 @@
               </div>
             </div>
         </div>
+    </div>
+
+
+    <div class="modal fade" id="screenshotModal" tabindex="-1" aria-labelledby="screenshotModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <!-- Modal header -->
+          <div class="modal-header">
+            <h5 class="modal-title" id="screenshotModalLabel">Screenshot</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <!-- Modal body -->
+          <div class="modal-body">
+            <img id="modalImage" src="" alt="Image" class="img-fluid">
+          </div>
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
     </div>
 
 

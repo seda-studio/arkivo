@@ -24,7 +24,13 @@ import Logger from '@ioc:Adonis/Core/Logger'
 
 Route.get('/', async ({ view }) => {
   Logger.info('')
-  return view.render('welcome')
+  return view.render('about')
+  //return view.render('welcome')
+})
+
+Route.get('/about', async ({ view }) => {
+  Logger.info('')
+  return view.render('about')
 })
 
 Route.group(() => { 
