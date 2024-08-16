@@ -66,6 +66,8 @@ export default class SnapshotArtifactService {
 
     async snapshot(artifact: Artifact, dryRun: boolean): Promise<void> {
 
+        const START_TIME = Date.now();
+
         // populate artifact info in snapshot data
         this.snapshotData.artifact.chain = artifact.chain;
         this.snapshotData.artifact.contractAddress = artifact.contractAddress;
@@ -108,13 +110,22 @@ export default class SnapshotArtifactService {
 
         await page.goto(pageUrl);
 
-        // Wait a few seconds
-        await page.waitForTimeout(SNAPSHOT_DURATION);
+
+        // check if the page contains any <script> tags (should work for both HTML and SVG)
+        let hasScripts = false;
+        const scriptTags = await page.$$eval('script', scripts => scripts.length);
+        hasScripts = scriptTags > 0;
+
+        const TIME_LEFT = SNAPSHOT_DURATION - (Date.now() - START_TIME);
+
+        // Wait for the remaining time
+        await page.waitForTimeout(TIME_LEFT);
 
         // capture screenshot
         console.log(`Taking screenshot...`);
         const buffer = await page.screenshot({ timeout: 60000 });
         this.snapshotData.snapshot.screenshot = buffer.toString('base64');
+
 
         console.log('extOrigins:', this.getOrigins());
 
@@ -124,10 +135,23 @@ export default class SnapshotArtifactService {
                 data: this.snapshotData
             });
 
+            let saveRequired = false;
+
             // update artifact networked status if necessary
             if (!artifact.isNetworked && this.extNetCalls) {
                 console.log(`Artifact ${artifact.id} is networked`);
                 artifact.isNetworked = true;
+                saveRequired = true;
+            }
+
+            // update artifact script status if necessary
+            if(!artifact.isScript && hasScripts) {
+                console.log(`Artifact contains scripts`);
+                artifact.isScript = true;
+                saveRequired = true;
+            }
+
+            if(saveRequired) {
                 await artifact.save();
             }
 
@@ -261,6 +285,29 @@ export default class SnapshotArtifactService {
         }
 
         return url.toString();
+    }
+
+
+    private async checkSVGScripts(page: any): Promise<boolean> { 
+
+        const svgHandle = await page.$('svg');
+
+        if (svgHandle) {
+          // Check if there is any <script> tag anywhere inside the SVG
+          const scriptTags = await svgHandle.$$eval('script', scripts => scripts.length);
+      
+          if (scriptTags > 0) {
+            console.log(`SVG contains ${scriptTags} <script> tag(s).`);
+            return true;
+          } else {
+            console.log('SVG does not contain any <script> tags.');
+          }
+        } else {
+          console.log('No SVG element found.');
+        }
+
+        return false;
+
     }
 
 }
