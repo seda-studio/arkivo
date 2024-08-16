@@ -2,10 +2,10 @@
   "entrypoints": {
     "app": {
       "css": [
-        "/assets/app.css"
+        "https://arkivo.art:8080/assets/app.css"
       ],
       "js": [
-        "/assets/app.js"
+        "https://arkivo.art:8080/assets/app.js"
       ]
     }
   }
