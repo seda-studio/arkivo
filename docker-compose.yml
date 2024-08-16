@@ -14,7 +14,7 @@ services:
       - 5439:5432
 
   redis:
-    container_name: arkivo_red
+    container_name: arkivo_redis
     image: redis:6-alpine
     volumes:
       - redis_volume:/data
@@ -129,7 +129,6 @@ services:
     command: dumb-init node ace queue:listen --queue=snapshot
 
 
-
   nginx:
     container_name: arkivo_nginx
     image: nginx:alpine
@@ -149,7 +148,6 @@ services:
       - NGINX_PORT=80
       - APP_PORT=${PORT}
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
-
 
 volumes:
   db_volume:

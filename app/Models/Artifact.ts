@@ -65,6 +65,9 @@ export default class Artifact extends BaseModel {
   public isNetworked: boolean
 
   @column()
+  public isScript: boolean
+
+  @column()
   public isBurned: boolean
 
   @column()

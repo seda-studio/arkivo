@@ -29,21 +29,28 @@ export default class ArtifactsController {
 
         if (searchQuery) {
             const normalizedSearchQuery = normalizeString(searchQuery);
+            const normalizedSearchTerms = normalizedSearchQuery.split(/\s+/);
 
+            const placeholders = normalizedSearchTerms.map(() => 'normalize(alias, NFKD) ILIKE ?').join(' OR ');
+            const queryValues = normalizedSearchTerms.map(value => `%${value}%`);
+            
             const artist = await Identity.query()
-                .whereRaw('normalize(alias, NFKD) ILIKE ?', [`%${normalizedSearchQuery}%`])
-                .first();
+                            .whereRaw(`(${placeholders})`, queryValues)
+                            .first();
 
             const artistAddress = artist ? artist.account : '';
         
+            const titlePlaceholders = normalizedSearchTerms.map(() => 'normalize(title, NFKD) ILIKE ?').join(' OR ');
+            const descriptionPlaceholders = normalizedSearchTerms.map(() => 'normalize(description, NFKD) ILIKE ?').join(' OR ');
+            
             artifacts = await Artifact.query()
-                .whereRaw('normalize(title, NFKD) ILIKE ?', [`%${normalizedSearchQuery}%`])
-                .orWhereRaw('normalize(description, NFKD) ILIKE ?', [`%${normalizedSearchQuery}%`])
+                .whereRaw(`(${titlePlaceholders})`, queryValues)
+                .orWhereRaw(`(${descriptionPlaceholders})`, queryValues)
                 .orWhere('artistAddress', artistAddress)
-               // .andWhere('isNetworked', true)
+                // .andWhere('isNetworked', true)
                 .andWhere('isBurned', false)
                 .orderBy('minted_at', 'desc')
-                .paginate(qs.page, 9)
+                .paginate(qs.page, 9);
 
             artifacts.searchQuery = searchQuery;
         } else {
