@@ -287,29 +287,6 @@ export default class SnapshotArtifactService {
         return url.toString();
     }
 
-
-    private async checkSVGScripts(page: any): Promise<boolean> { 
-
-        const svgHandle = await page.$('svg');
-
-        if (svgHandle) {
-          // Check if there is any <script> tag anywhere inside the SVG
-          const scriptTags = await svgHandle.$$eval('script', scripts => scripts.length);
-      
-          if (scriptTags > 0) {
-            console.log(`SVG contains ${scriptTags} <script> tag(s).`);
-            return true;
-          } else {
-            console.log('SVG does not contain any <script> tags.');
-          }
-        } else {
-          console.log('No SVG element found.');
-        }
-
-        return false;
-
-    }
-
 }
 
 
