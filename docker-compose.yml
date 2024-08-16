@@ -109,6 +109,45 @@ services:
     command: dumb-init node ace queue:listen --queue=snapshot
 
 
+  worker-snapshot2:
+    container_name: arkivo_worker_snapshot2
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    build:
+      context: .
+      dockerfile: ./docker/worker-snapshot/Dockerfile
+      target: dependencies
+    env_file:
+      - .env
+    environment:
+      - PG_HOST=postgres
+      - REDIS_HOST=redis
+    volumes:
+      - ./:/home/node/app
+    command: dumb-init node ace queue:listen --queue=snapshot
+
+
+  nginx:
+    container_name: arkivo_nginx
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/letsencrypt
+      - ./webroot:/var/www/html
+    depends_on:
+      - app
+      - ipfs
+    environment:
+      - NGINX_HOST=arkivo.art
+      - NGINX_PORT=80
+      - APP_PORT=${PORT}
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
 volumes:
   db_volume:

@@ -112,8 +112,8 @@ export default class SnapshotArtifactService {
         await page.waitForTimeout(SNAPSHOT_DURATION);
 
         // capture screenshot
-        const buffer = await page.screenshot({fullPage: true});
-        await page.screenshot({ path: 'screenshot.png', fullPage: true });
+        console.log(`Taking screenshot...`);
+        const buffer = await page.screenshot({ timeout: 60000 });
         this.snapshotData.snapshot.screenshot = buffer.toString('base64');
 
         console.log('extOrigins:', this.getOrigins());
