@@ -87,8 +87,8 @@ services:
     command: dumb-init node ace queue:listen --queue=ipfs
 
 
-  worker-snapshot:
-    container_name: arkivo_worker_snapshot
+  worker-snapshot1:
+    container_name: arkivo_worker_snapshot1
     restart: always
     depends_on:
       - postgres
@@ -109,6 +109,46 @@ services:
 
   worker-snapshot2:
     container_name: arkivo_worker_snapshot2
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    build:
+      context: .
+      dockerfile: ./docker/worker-snapshot/Dockerfile
+      target: dependencies
+    env_file:
+      - .env
+    environment:
+      - PG_HOST=postgres
+      - REDIS_HOST=redis
+    volumes:
+      - ./:/home/node/app
+    command: dumb-init node ace queue:listen --queue=snapshot
+
+
+  worker-snapshot3:
+    container_name: arkivo_worker_snapshot3
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    build:
+      context: .
+      dockerfile: ./docker/worker-snapshot/Dockerfile
+      target: dependencies
+    env_file:
+      - .env
+    environment:
+      - PG_HOST=postgres
+      - REDIS_HOST=redis
+    volumes:
+      - ./:/home/node/app
+    command: dumb-init node ace queue:listen --queue=snapshot
+
+
+  worker-snapshot4:
+    container_name: arkivo_worker_snapshot4
     restart: always
     depends_on:
       - postgres
