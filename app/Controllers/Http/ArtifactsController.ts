@@ -95,8 +95,18 @@ export default class ArtifactsController {
 
         console.log('Platform specific URI: ' + artifact.artifactUri);
 
+
+        artifact.mintedAt.toFormat('yyyy-MM-dd HH:mm:ss');
+
         // populate artist alias
         await populateArtistAlias(artifact);
+
+        // iterate snapshots and count how many net calls were external, using: net.type == 1 && net.external
+        for (let i = 0; i < artifact.snapshots.length; i++) {
+            let snapshot = artifact.snapshots[i];
+            snapshot.externalCalls = snapshot.data.snapshot.net.filter((net) => net.type == 1 && net.external);
+        }
+
 
         return view.render('artifact', { artifact })
     }

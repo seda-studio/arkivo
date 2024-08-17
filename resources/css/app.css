@@ -303,3 +303,27 @@ html, body {
 }
 	
 }
+
+
+.snapshot-container {
+	display: flex;
+}
+
+.snapshot-left-cell {
+	width: 80%;
+}
+
+.snapshot-right-cell {
+	display: flex;
+	align-items: center;
+	margin: 10px;
+	padding: 10px;
+	width: 20%;
+}
+
+
+.snapshot-right-cell img {
+	max-height: 100%;
+	width: auto;
+	height: auto;
+}

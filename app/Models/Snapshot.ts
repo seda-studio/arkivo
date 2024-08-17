@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import Artifact from 'App/Models/Artifact'
-import { ISnapshotDataV1 } from './interfaces/SnapshotDataV1'
+import { INetworkData, ISnapshotDataV1 } from './interfaces/SnapshotDataV1'
 
 export default class Snapshot extends BaseModel {
   @column({ isPrimary: true })
@@ -15,6 +15,8 @@ export default class Snapshot extends BaseModel {
 
   @column()
   public data: ISnapshotDataV1
+
+  public externalCalls: INetworkData[]
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
