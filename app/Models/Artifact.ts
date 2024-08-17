@@ -46,7 +46,7 @@ export default class Artifact extends BaseModel {
 
   public artistAlias: string
 
-  @column()
+  @column.dateTime()
   public mintedAt: DateTime
 
   @column()

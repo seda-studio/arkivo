@@ -55,7 +55,7 @@
                                 </tr>
                                 <tr>
                                   <th scope="row">Minted at</th>
-                                  <td><code>{{ artifact.mintedAt }}</code></td>
+                                  <td><code>{{ artifact.mintedAt.toUTC().toFormat('dd LLL yyyy, HH:mm z')}}</code></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -115,7 +115,23 @@
                   </h2>
                   <div id="collapseClassification" class="accordion-collapse collapse" data-bs-parent="#rightAccordion">
                     <div class="accordion-body">
-                      TODO
+                      
+                      <table class="table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">JavaScript</th>
+                                <td><code>{{ artifact.isScript }}</code></td>
+                              </tr>
+                            <tr>
+                              <th scope="row">Networked</th>
+                              <td><code>{{ artifact.isNetworked }}</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+
+
+
                     </div>
                   </div>
                 </div>
@@ -152,27 +168,59 @@
                       </h2>
                       <div id="collapseSnapshots" class="accordion-collapse collapse" data-bs-parent="#snapshotsAccordion">
                         <div class="accordion-body">
-                          <div>
-                            <p>test</p>
+
                                 @each((snapshot, index) in artifact.snapshots.reverse())
-                                    <!-- create a list of snapshots, just showing the timestamp for now -->
-                                    <h5 class="card-title text-center">{{ snapshot.data.title }}</h5>
-                                    <p>{{ snapshot.data.version }}</p>
-                                    <p>{{ snapshot.data.timestamp }}</p>
-                                    <p>External calls:</p>
-                                    @each((net, index) in snapshot.data.snapshot.net)
-                                      @if(net.type == 1 && net.external)
-                                        <p>{{ net.data.url }}</p>                                        
-                                      @end
-                                    @end
 
-                                    <img id = 'screen{{index}}' src = 'data:image/png;base64,{{ snapshot.data.snapshot.screenshot }}' alt="Snapshot Image" style="display: none;">
+                                  <div class="snapshot-container">
+                                    <div class="snapshot-left-cell">
 
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#screenshotModal" onclick="document.getElementById('modalImage').src = document.getElementById('screen{{index}}').src">
-                                      Screenshot
-                                    </button>
+                                      <table class="table">
+                                        <tbody>
+                                            <tr>
+                                                <th scope="row">Timestamp (UTC)</th>
+                                                <td><code>{{ new Date(snapshot.data.timestamp).toISOString() }}</code></td>
+                                            </tr>
+                                            <tr>
+                                              <th scope="row">Timestamp ({{ Intl.DateTimeFormat().resolvedOptions().timeZone; }})</th>
+                                              <td><code>{{ new Date(snapshot.data.timestamp).toLocaleString() }}</code></td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Snapshot version</th>
+                                                <td><code>{{ snapshot.data.version }}</code></td>
+                                            </tr>
+                                            <tr>
+                                              <th scope="row">External network calls</th>
+                                              <td><code> {{ snapshot.externalCalls.length }} </code></td>
+                                            </tr>
+
+                                            @if(snapshot.externalCalls) 
+                                              <tr>
+                                                <th scope="row"></th>
+                                                <td>
+                                                  <table class="table">
+                                                    <tbody>
+                                                      @each((net, index) in snapshot.externalCalls)
+                                                        <tr>
+                                                          <td><code>{{ net.type == 1 ? 'GET' : 'POST' }}</code></td>
+                                                          <td><code>{{ net.data.url }}</code></td>
+                                                        </tr>
+                                                      @end
+                                                    </tbody>
+                                                  </table>
+                                                </td>
+                                              </tr>
+                                    
+
+                                            @end
+                                        </tbody>
+                                    </table>
+                                    </div>
+                                    <div class="snapshot-right-cell">
+                                      <img id = 'screen{{index}}' src = 'data:image/png;base64,{{ snapshot.data.snapshot.screenshot }}' alt="Snapshot Image" style="width: 100%;" data-bs-toggle="modal" data-bs-target="#screenshotModal" onclick="document.getElementById('modalImage').src = document.getElementById('screen{{index}}').src" >
+                                    </div>
+                                  </div>
+                                  <hr>
                                 @end
-                            </div>
                         </div>
                       </div>
                     </div>
@@ -184,7 +232,7 @@
 
 
     <div class="modal fade" id="screenshotModal" tabindex="-1" aria-labelledby="screenshotModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <!-- Modal header -->
           <div class="modal-header">
