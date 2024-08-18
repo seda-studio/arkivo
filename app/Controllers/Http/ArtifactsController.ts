@@ -121,7 +121,14 @@ export default class ArtifactsController {
         }
 
 
-        return view.render('artifact', { artifact })
+        const citationMetadata = {
+            title: artifact.title,
+            description: artifact.description,
+            author: artifact.artistAlias,
+            date: artifact.mintedAt.toFormat('yyyy-MM-dd HH:mm:ss'),
+        }
+
+        return view.render('artifact', { artifact, citationMetadata })
     }
 
     public async showPlatformToken(ctx: HttpContextContract) {
