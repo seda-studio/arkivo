@@ -110,6 +110,10 @@ export default class ProcessArtifact implements JobHandlerContract {
 async function opFetch(artifact: Artifact) {
   await fetchIPFS(artifact.metadataUri)
   await fetchIPFS(artifact.artifactUri)
+
+  if (artifact.thumbnailUri) {
+    await fetchIPFS(artifact.thumbnailUri)
+  }
 }
 
 async function opPin(artifact: Artifact) {
@@ -118,6 +122,11 @@ async function opPin(artifact: Artifact) {
 
     // 2. pin the artifact payload
     const artifactPinned = await pinIPFS(artifact.artifactUri)
+
+    // 3. pin the artifact thumbnail (if it exists)
+    if (artifact.thumbnailUri) {
+      await pinIPFS(artifact.thumbnailUri)
+    }
 
     // 3. retrieve artifact size
     const artifact_size = await getIPFSFileSize(artifact.artifactUri)
