@@ -41,6 +41,8 @@ Route.group(() => {
 
   Route.get('/:platform/:tokenId', 'ArtifactsController.showPlatformToken').as('showPlatformToken')
 
+  Route.get('/:chain/:contractAddress/:tokenId', 'ArtifactsController.showFQNToken').as('showFQNToken')
+
   Route.post('/', 'ArtifactsController.store').as('store')
 
   Route.post('/:id/edit', 'ArtifactsController.update').as('edit')

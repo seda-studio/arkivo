@@ -23,6 +23,7 @@ export default class ArtifactsController {
         }
 
         const searchQuery = request.input('search')
+        const netOnly = request.input('netonly')
 
 
         let artifacts;
@@ -44,22 +45,29 @@ export default class ArtifactsController {
             const descriptionPlaceholders = normalizedSearchTerms.map(() => 'normalize(description, NFKD) ILIKE ?').join(' OR ');
             
             artifacts = await Artifact.query()
-                .whereRaw(`(${titlePlaceholders})`, queryValues)
-                .orWhereRaw(`(${descriptionPlaceholders})`, queryValues)
-                .orWhere('artistAddress', artistAddress)
-                // .andWhere('isNetworked', true)
+                .where((query) => {
+                    query.whereRaw(`(${titlePlaceholders})`, queryValues)
+                        .orWhereRaw(`(${descriptionPlaceholders})`, queryValues)
+                        .orWhere('artistAddress', artistAddress)
+                })
+                .if(netOnly, (query) => {
+                    query.andWhere('isNetworked', true)
+                })
                 .andWhere('isBurned', false)
                 .orderBy('minted_at', 'desc')
                 .paginate(qs.page, 9);
-
-            artifacts.searchQuery = searchQuery;
         } else {
             artifacts = await Artifact.query()
-               // .where('isNetworked', true)
+                .if(netOnly, (query) => {
+                    query.andWhere('isNetworked', true)
+                })
                 .where('isBurned', false)
                 .orderBy('minted_at', 'desc')
-                .paginate(qs.page, 9)
+                .paginate(qs.page, 9);
         }
+
+        artifacts.searchQuery = searchQuery;
+        artifacts.netOnly = netOnly
 
 
         await Promise.all(artifacts.map(async (artifact) => {
@@ -76,13 +84,18 @@ export default class ArtifactsController {
 
             // populate artist alias
             await populateArtistAlias(artifact);
+
+            artifact.publicURL = getPublicArtifactURL(artifact);
         }));
 
         return view.render('artifacts', { artifacts })
     }
 
 
-    public async show({ view, params }: HttpContextContract) {
+    public async show(ctx: HttpContextContract) {
+
+        const { view, params } = ctx;
+
         // const artifact = await Artifact.query().where('id', params.id).preload('tags').firstOrFail()
         const artifact = await Artifact.query()
                             .where('id', params.id)
@@ -111,18 +124,43 @@ export default class ArtifactsController {
         return view.render('artifact', { artifact })
     }
 
-    public async showPlatformToken({ view, params }: HttpContextContract) {
+    public async showPlatformToken(ctx: HttpContextContract) {
 
-        const artifact = await Artifact.query().where('platform', params.platform).andWhere('token_id', params.tokenId).firstOrFail()
+        const { params } = ctx
 
-        const ipfsGateway = Env.get('IPFS_GATEWAY')
+        console.log('Platform: ' + params.platform + ' Token ID: ' + params.tokenId);
 
-        // Remove "ipfs://" prefix and any URI attributes
-        const cleanUri = artifact.artifactUri.replace('ipfs://', '').split('?')[0];
-        artifact.artifactUri = ipfsGateway + "/" + cleanUri;
+        const artifact = await Artifact.query().where('platform', params.platform).andWhere('token_id', params.tokenId)
+                                        .firstOrFail();
 
-        return view.render('artifact', { artifact })
+
+        params.id = artifact.id;
+
+        return this.show(ctx);
+        
     }
+
+
+
+    public async showFQNToken(ctx: HttpContextContract) {
+
+        const { params } = ctx
+
+        console.log('Chain: ' + params.chain + ' Contract Address: ' + params.contractAddress + ' Token ID: ' + params.tokenId);
+
+        const artifact = await Artifact.query()
+                                .where('chain', params.chain)  
+                                .andWhere('contract_address', params.contractAddress)
+                                .andWhere('token_id', params.tokenId)
+                                .firstOrFail();
+
+
+        params.id = artifact.id;
+
+        return this.show(ctx);    
+    }
+
+    
 
     public async store({ }: HttpContextContract) {
         const artifact = new Artifact()
@@ -277,3 +315,13 @@ function getPlatformSpecificUri(artifact: Artifact) {
 
     return url.toString();
 }
+
+
+function getPublicArtifactURL(artifact: Artifact) {
+
+    if(artifact.platform == 'HEN') {
+        return `HEN/${artifact.tokenId}`;
+    }
+
+    return `${artifact.chain}/${artifact.contractAddress}/${artifact.tokenId}`;
+}   

@@ -4,13 +4,19 @@
 <div class="container">
     <form method="GET" action="/artifacts" class="d-flex justify-content-center mb-4">
         <input type="text" name="search" value="{{ artifacts.searchQuery || '' }}" placeholder="Search artifacts..." class="form-control" style="width: 400px;">
-        <button type="submit" class="btn btn-primary ms-2">Search</button>
+        <div class="form-check ms-2 d-flex align-items-center">
+            <input class="form-check-input" type="checkbox" name="netonly" id="netonly" {{ artifacts.netOnly ? 'checked' : '' }} style="position: relative; top: -3px;">
+            <label class="form-check-label ms-2 align-middle" for="netonly">
+                Networked only
+            </label>
+        </div>
+        <button type="submit" class="btn btn-primary ms-3">Search</button>
     </form>
 
     <ul class="card-list">
         @each(artifact in artifacts)
         <li class="card">
-            <a class="card-image" href="/artifacts/{{ artifact.id }}" style="background: url('/images/loading.gif') center center no-repeat; background-size: contain;">
+            <a class="card-image" href="/artifacts/{{ artifact.publicURL }}" style="background: url('/images/loading.gif') center center no-repeat; background-size: contain;">
                 <img loading="lazy" src="{{ artifact.thumbnailUri }}" alt="{{ artifact.title }}" onload="this.parentElement.style.background='none';">
             </a>
                 <h2>{{ artifact.artistAlias }}</h2>
@@ -23,42 +29,21 @@
     {{--  coding with covid sucks. refactor this when possible   --}}
     <div class="pagination-container" style="text-align: center;">
         @if(artifacts.currentPage > 1)
-            @if(artifacts.searchQuery)
-                <a href="/artifacts?page=1&search={{ artifacts.searchQuery }}" class="btn btn-primary">⏮</a>
-                <a href="/artifacts?page={{ artifacts.currentPage - 1 }}&search={{ artifacts.searchQuery }}" class="btn btn-primary">◀</a>
-            @else
-                <a href="/artifacts?page=1" class="btn btn-primary">⏮</a>
-                <a href="/artifacts?page={{ artifacts.currentPage - 1 }}" class="btn btn-primary">◀</a>
-            @endif
+            <a href="/artifacts?page=1{{ artifacts.searchQuery ? '&search=' + artifacts.searchQuery : '' }}{{ artifacts.netOnly ? '&netonly=' + artifacts.netOnly : '' }}" class="btn btn-primary">⏮</a>
+            <a href="/artifacts?page={{ artifacts.currentPage - 1 }}{{ artifacts.searchQuery ? '&search=' + artifacts.searchQuery : '' }}{{ artifacts.netOnly ? '&netonly=' + artifacts.netOnly : '' }}" class="btn btn-primary">◀</a>
         @else
-            @if(artifacts.searchQuery)
-                <a href="/artifacts?page=1&search={{ artifacts.searchQuery }}" class="btn btn-primary disabled">⏮</a>
-                <a href="/artifacts?page={{ artifacts.currentPage - 1 }}&search={{ artifacts.searchQuery }}" class="btn btn-primary disabled">◀</a>
-            @else
-                <a href="/artifacts?page=1" class="btn btn-primary disabled">⏮</a>
-                <a href="/artifacts?page={{ artifacts.currentPage - 1 }}" class="btn btn-primary disabled">◀</a>
-            @endif
-
+            <a href="/artifacts?page=1{{ artifacts.searchQuery ? '&search=' + artifacts.searchQuery : '' }}{{ artifacts.netOnly ? '&netonly=' + artifacts.netOnly : '' }}" class="btn btn-primary disabled">⏮</a>
+            <a href="/artifacts?page={{ artifacts.currentPage - 1 }}{{ artifacts.searchQuery ? '&search=' + artifacts.searchQuery : '' }}{{ artifacts.netOnly ? '&netonly=' + artifacts.netOnly : '' }}" class="btn btn-primary disabled">◀</a>
         @endif
 
         <span class="current-page" style="font-weight: bold; margin: 0 10px;">{{ artifacts.currentPage }}</span>
 
         @if(artifacts.currentPage < artifacts.lastPage)
-            @if(artifacts.searchQuery)
-                <a href="/artifacts?page={{ artifacts.currentPage + 1 }}&search={{ artifacts.searchQuery }}" class="btn btn-primary">▶</a>
-                <a href="/artifacts?page={{ artifacts.lastPage }}&search={{ artifacts.searchQuery }}" class="btn btn-primary">⏭</a>
-            @else
-                <a href="/artifacts?page={{ artifacts.currentPage + 1 }}" class="btn btn-primary">▶</a>
-                <a href="/artifacts?page={{ artifacts.lastPage }}" class="btn btn-primary">⏭</a>
-            @endif
+            <a href="/artifacts?page={{ artifacts.currentPage + 1 }}{{ artifacts.searchQuery ? '&search=' + artifacts.searchQuery : '' }}{{ artifacts.netOnly ? '&netonly=' + artifacts.netOnly : '' }}" class="btn btn-primary">▶</a>
+            <a href="/artifacts?page={{ artifacts.lastPage }}{{ artifacts.searchQuery ? '&search=' + artifacts.searchQuery : '' }}{{ artifacts.netOnly ? '&netonly=' + artifacts.netOnly : '' }}" class="btn btn-primary">⏭</a>
         @else
-            @if(artifacts.searchQuery)
-                <a href="/artifacts?page={{ artifacts.currentPage + 1 }}&search={{ artifacts.searchQuery }}" class="btn btn-primary disabled">▶</a>
-                <a href="/artifacts?page={{ artifacts.lastPage }}&search={{ artifacts.searchQuery }}" class="btn btn-primary disabled">⏭</a>
-            @else
-                <a href="/artifacts?page={{ artifacts.currentPage + 1 }}" class="btn btn-primary disabled">▶</a>
-                <a href="/artifacts?page={{ artifacts.lastPage }}" class="btn btn-primary disabled">⏭</a>
-            @endif
+            <a href="/artifacts?page={{ artifacts.currentPage + 1 }}{{ artifacts.searchQuery ? '&search=' + artifacts.searchQuery : '' }}{{ artifacts.netOnly ? '&netonly=' + artifacts.netOnly : '' }}" class="btn btn-primary disabled">▶</a>
+            <a href="/artifacts?page={{ artifacts.lastPage }}{{ artifacts.searchQuery ? '&search=' + artifacts.searchQuery : '' }}{{ artifacts.netOnly ? '&netonly=' + artifacts.netOnly : '' }}" class="btn btn-primary disabled">⏭</a>
         @endif
     </div>
      

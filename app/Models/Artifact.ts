@@ -17,6 +17,8 @@ export default class Artifact extends BaseModel {
   @column()
   public tokenId: string
 
+  public publicURL: string
+
   @column()
   public platform: string
 
