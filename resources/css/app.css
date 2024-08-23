@@ -327,3 +327,9 @@ html, body {
 	width: auto;
 	height: auto;
 }
+
+@media (max-width: 768px) {
+	main {
+	  margin-top: 150px;
+	}
+  }
