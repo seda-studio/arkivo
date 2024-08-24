@@ -33,13 +33,13 @@ services:
       # Swarm listens on all interfaces, so is remotely reachable.
       - 4001:4001/tcp
       - 4001:4001/udp
-      
+
       # The following ports only listen on the loopback interface, so are not remotely reachable by default.
       # If you want to override these or add more ports, see https://docs.docker.com/compose/extends/ .
-      
+
       # API port, which includes admin operations, so you probably don't want this remotely accessible.
       - 5001:5001
-      
+
       # HTTP Gateway
       - 8081:8080
 
@@ -53,7 +53,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/app/Dockerfile
-      target: dependencies
     ports:
       - ${PORT}:${PORT}
       - 9229:9229
@@ -65,7 +64,6 @@ services:
       - REDIS_HOST=redis
     volumes:
       - ./:/home/node/app
-    command: dumb-init node ace serve --encore-args="--host ${HOST} --port 8080 --public arkivo.art:8080 --allowed-hosts arkivo.art --server-type https --server-options-key ./ssl/archive/arkivo.art/privkey1.pem --server-options-cert ./ssl/archive/arkivo.art/fullchain1.pem --server-options-ca ./ssl/archive/arkivo.art/chain1.pem"
 
   worker-ipfs:
     container_name: arkivo_worker_ipfs
@@ -76,7 +74,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/worker-ipfs/Dockerfile
-      target: dependencies
     env_file:
       - .env
     environment:
@@ -84,7 +81,6 @@ services:
       - REDIS_HOST=redis
     volumes:
       - ./:/home/node/app
-    command: dumb-init node ace queue:listen --queue=ipfs
 
 
   worker-snapshot:
@@ -96,7 +92,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/worker-snapshot/Dockerfile
-      target: dependencies
     env_file:
       - .env
     environment:
@@ -104,27 +99,6 @@ services:
       - REDIS_HOST=redis
     volumes:
       - ./:/home/node/app
-    command: dumb-init node ace queue:listen --queue=snapshot
-
-
-  worker-snapshot2:
-    container_name: arkivo_worker_snapshot2
-    restart: always
-    depends_on:
-      - postgres
-      - redis
-    build:
-      context: .
-      dockerfile: ./docker/worker-snapshot/Dockerfile
-      target: dependencies
-    env_file:
-      - .env
-    environment:
-      - PG_HOST=postgres
-      - REDIS_HOST=redis
-    volumes:
-      - ./:/home/node/app
-    command: dumb-init node ace queue:listen --queue=snapshot
 
 
   nginx:
