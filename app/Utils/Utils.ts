@@ -24,8 +24,8 @@ export function getWorkingUri(uri: string) : string {
     const protocol = uriParts[0];
     const path = uriParts[1];
 
-    Logger.debug('Protocol: ' + protocol);
-    Logger.debug('Path: ' + path);
+    // Logger.debug('Protocol: ' + protocol);
+    // Logger.debug('Path: ' + path);
 
 
     switch (protocol) {
