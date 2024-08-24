@@ -6,7 +6,6 @@ import Env from '@ioc:Adonis/Core/Env'
 import { Queue } from '@ioc:Rlanz/Queue';
 import axios from 'axios'
 import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
-import Logger from '@ioc:Adonis/Core/Logger'
 import { truncAddress, getWorkingUri, normalizeString } from 'App/Utils/Utils';
 
 const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
@@ -82,8 +81,12 @@ export default class ArtifactsController {
                 artifact.thumbnailUri = getWorkingUri(artifact.thumbnailUri);
             }
 
-            // populate artist alias
-            await populateArtistAlias(artifact);
+            try {
+                // populate artist alias
+                await populateArtistAlias(artifact);
+            } catch (error) {
+                console.error("###### Error populating artist alias: " + error);
+            }
 
             artifact.publicURL = getPublicArtifactURL(artifact);
         }));
@@ -242,35 +245,37 @@ export default class ArtifactsController {
 async function populateArtistAlias(artifact: Artifact) {
 
     // console.log('Checking artist alias...');
+    
+    try {
+        let artist = await Identity.query()
+            .where('account', artifact.artistAddress)
+            .first();
 
+        if (artist) {
+            // console.log('Artist alias found: ' + artist.alias);
+            artifact.artistAlias = artist.alias;
 
-    let artist = await Identity.query()
-        .where('account', artifact.artistAddress)
-        .first();
-
-    if (artist) {
-        // console.log('Artist alias found: ' + artist.alias);
-        artifact.artistAlias = artist.alias;
-
-    } else {
-        console.log('Artist address not found: ' + artifact.artistAddress);
-
-        let query = getArtistAliasQuery(artifact.artistAddress);
-
-        const response = await makeGraphQLRequest(query);
-
-        if (response && response.data && response.data.data && response.data.data.tzprofiles && response.data.data.tzprofiles.length > 0) {
-
-            const alias = response.data.data.tzprofiles[0].alias;
-
-            artifact.artistAlias = alias;
         } else {
-            artifact.artistAlias = truncAddress(artifact.artistAddress);
+            console.log('Artist address not found: ' + artifact.artistAddress);
+
+            let query = getArtistAliasQuery(artifact.artistAddress);
+
+            const response = await makeGraphQLRequest(query);
+
+            if (response && response.data && response.data.data && response.data.data.tzprofiles && response.data.data.tzprofiles.length > 0) {
+
+                const alias = response.data.data.tzprofiles[0].alias;
+
+                artifact.artistAlias = alias;
+            } else {
+                artifact.artistAlias = truncAddress(artifact.artistAddress);
+            }
+
+            createOrUpdateArtistProfile(artifact.artistAddress);
         }
 
-        createOrUpdateArtistProfile(artifact.artistAddress);
-
-
+    } catch (error) {    
+        console.error(error);
     }
 
 }
@@ -357,60 +362,10 @@ function getPublicArtifactURL(artifact: Artifact) {
 export async function createOrUpdateArtistProfile(address: string) {
 
     // Logger.info('Updating artist profile: ' + address)
-  
-    let artist = await Identity.query()
-      .where('account', address)
-      .first();
-  
-    if (!artist) {
-    artist = new Identity();
-    } else {
-        return;
-    }
-  
-    const response = await makeGraphQLRequest(getArtistProfileData(address));
-  
-    if (response && response.data && response.data.data && response.data.data.tzprofiles && response.data.data.tzprofiles.length > 0) {
-  
-      const profile = response.data.data.tzprofiles[0];
-  
-      artist.account = profile.account;
-      artist.alias = profile.alias;
-      artist.description = profile.description;
-      artist.discord = profile.discord;
-      artist.domainName = profile.domain_name;
-      artist.ethereum = profile.ethereum;
-      artist.github = profile.github;
-      artist.logo = profile.logo;
-      artist.twitter = profile.twitter;
-      artist.website = profile.website;
-  
-      await artist.save();
-      
-    } else {
-        artist = new Identity();
-        artist.account = address;
-        artist.alias = truncAddress(address);
-        await artist.save();
-    }
+
+    const searchPayload = { account: address }
+    const savePayload = { alias: truncAddress(address) }
+    
+    await Identity.firstOrCreate(searchPayload, savePayload);
+
   }
-
-  function getArtistProfileData(address: string) {
-
-    return `
-    query artistInfo($address: String = "${address}") {
-          tzprofiles(where: {account: {_eq: $address}}) {
-                account
-                alias
-                description
-                discord
-                domain_name
-                ethereum
-                github
-                logo
-                twitter
-                website
-            }
-        }
-    `
-  };
