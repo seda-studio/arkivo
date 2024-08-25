@@ -1,4 +1,4 @@
-import { BaseCommand, flags } from '@adonisjs/core/build/standalone'
+import { BaseCommand, args, flags } from '@adonisjs/core/build/standalone'
 import { Queue } from '@ioc:Rlanz/Queue';
 import Env from '@ioc:Adonis/Core/Env'
 import { ProcessArtifactPayload, ProcessOperation } from 'App/Jobs/ProcessArtifact'
@@ -9,7 +9,17 @@ export default class ArtifactPin extends BaseCommand {
    */
   public static commandName = 'artifacts:pin'
 
-  @flags.boolean({ alias: 'f', description: 'Force pin all artifacts' })
+
+  @args.string({ description: 'Blockchain (tezos, ethereum, solana, etc)' })
+  public chain: string
+
+  @args.string({ description: 'Contract address' })
+  public contract: string
+
+  @args.string({ description: 'Token Id' })
+  public token_id: string
+
+  @flags.boolean({ alias: 'a', description: 'Force pin all artifacts' })
   public all: boolean
 
   /**
@@ -43,11 +53,6 @@ export default class ArtifactPin extends BaseCommand {
     
     if(this.all) {
       artifacts = await Artifact.query();
-    } else {
-      artifacts = await Artifact.query()
-        .where('is_fetched ', false)
-        .andWhere('is_pinned', false);
-    }
 
       // for each result, dispatch a job to process the artifact
 
@@ -63,6 +68,32 @@ export default class ArtifactPin extends BaseCommand {
         await Queue.dispatch('App/Jobs/ProcessArtifact', payload, {queueName: QUEUE_IPFS});
         this.logger.info('Token sent for processing: ' + artifact.tokenId);
       }
+
+    } else {
+
+      this.logger.log('chain: [' + this.chain + ']');
+      this.logger.log('contract: [' + this.contract + ']');
+      this.logger.log('token_id: [' + this.token_id + ']');
+
+      const artifact = await Artifact.query()
+        .where('chain', 'tezos')
+        .andWhere('contract_address', this.contract)
+        .andWhere('token_id', this.token_id)
+        .first()
+
+        if (artifact) {
+          const payload: ProcessArtifactPayload = {
+            operations: [ ProcessOperation.PIN ],
+            chain: artifact.chain,
+            contractAddress: artifact.contractAddress,
+            tokenId: artifact.tokenId
+          }
+
+          await Queue.dispatch('App/Jobs/ProcessArtifact', payload, {queueName: QUEUE_IPFS});
+          this.logger.info('Token sent for processing: ' + artifact.tokenId);
+        }
+
+    }
 
   }
 

@@ -43,14 +43,36 @@
       "commandPath": "./commands/ArtifactsPin",
       "commandName": "artifacts:pin",
       "description": "Fetches and Pins already existing artifacts records",
-      "args": [],
+      "args": [
+        {
+          "type": "string",
+          "propertyName": "chain",
+          "name": "chain",
+          "required": true,
+          "description": "Blockchain (tezos, ethereum, solana, etc)"
+        },
+        {
+          "type": "string",
+          "propertyName": "contract",
+          "name": "contract",
+          "required": true,
+          "description": "Contract address"
+        },
+        {
+          "type": "string",
+          "propertyName": "token_id",
+          "name": "token_id",
+          "required": true,
+          "description": "Token Id"
+        }
+      ],
       "aliases": [],
       "flags": [
         {
           "name": "all",
           "propertyName": "all",
           "type": "boolean",
-          "alias": "f",
+          "alias": "a",
           "description": "Force pin all artifacts"
         }
       ]
