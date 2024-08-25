@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     container_name: arkivo_db
@@ -67,7 +65,7 @@ services:
       - REDIS_HOST=redis
     volumes:
       - ./:/home/node/app
-    command: dumb-init node ace serve --encore-args="--host ${HOST} --port 8080 --public arkivo.art:8080 --allowed-hosts arkivo.art --server-type https --server-options-key ./ssl/archive/arkivo.art/privkey1.pem --server-options-cert ./ssl/archive/arkivo.art/fullchain1.pem --server-options-ca ./ssl/archive/arkivo.art/chain1.pem"
+    command: dumb-init node ace serve --watch --encore-args="--host 0.0.0.0 --port 8080 --public localhost:8080"
 
   worker-ipfs:
     container_name: arkivo_worker_ipfs
