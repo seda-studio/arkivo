@@ -1,6 +1,7 @@
 services:
   postgres:
     container_name: arkivo_db
+    restart: unless-stopped
     image: postgres:13
     volumes:
       - db_volume:/var/lib/postgresql/data
@@ -13,6 +14,7 @@ services:
 
   redis:
     container_name: arkivo_redis
+    restart: unless-stopped
     image: redis:6-alpine
     volumes:
       - redis_volume:/data
@@ -45,7 +47,7 @@ services:
 
   app:
     container_name: arkivo_app
-    restart: always
+    restart: unless-stopped
     depends_on:
       - postgres
       - redis
@@ -67,7 +69,7 @@ services:
 
   worker-ipfs:
     container_name: arkivo_worker_ipfs
-    restart: always
+    restart: unless-stopped
     depends_on:
       - postgres
       - redis
