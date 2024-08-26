@@ -108,7 +108,7 @@ export default class ArtifactsController {
                             .firstOrFail();
 
         artifact.artifactUri = getPlatformSpecificUri(artifact);
-
+        artifact.metadataUri = getWorkingUri(artifact.metadataUri);
 
         console.log('Platform specific URI: ' + artifact.artifactUri);
 
