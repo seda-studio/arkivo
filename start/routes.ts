@@ -52,3 +52,11 @@ Route.group(() => {
   Route.delete('/:id', 'ArtifactsController.destroy').as('destroy')
 
 }).prefix('/artifacts').as('artifacts.')
+
+
+
+Route.group(() => { 
+
+  Route.get('/:id', 'SnapshotsController.show').as('get')
+
+}).prefix('/snapshots').as('snapshots.')
