@@ -3,7 +3,7 @@
 @section('body')
 
     <div class="flex-container">
-        <iframe class='artifact-main' src="{{{ artifact.artifactUri }}}" sandbox="allow-scripts allow-same-origin allow-modals allow-pointer-lock" allow="accelerometer; camera; fullscreen; gyroscope; microphone; midi *; xr-spatial-tracking;"></iframe>
+        <iframe class='artifact-main' loading="lazy" src="{{{ artifact.artifactUri }}}" sandbox="allow-scripts allow-same-origin allow-modals allow-pointer-lock" allow="accelerometer; camera; fullscreen; gyroscope; microphone; midi *; xr-spatial-tracking;"></iframe>
     </div>
 
     <div class="container-fluid text-center my-3">
@@ -74,7 +74,7 @@
                             <tbody>
                                 <tr>
                                     <th scope="row">Metadata URI</th>
-                                    <td><a href="{{ artifact.metadataUri}}">Metadata URI</a></td>
+                                    <td><a href="{{ artifact.metadataUri}}" target="_blank">Metadata URI</a></td>
                                   </tr>
                                 <tr>
                                   <th scope="row">Artifact URI</th>
