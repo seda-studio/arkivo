@@ -73,6 +73,7 @@ export default class ArtifactsController {
 
 
             artifact.artifactUri = getWorkingUri(artifact.artifactUri);
+            artifact.metadataUri = getWorkingUri(artifact.metadataUri);
 
             if (artifact.mimeType == 'image/svg+xml') {
                 artifact.thumbnailUri = "/images/svg-placeholder.png";
