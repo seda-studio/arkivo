@@ -197,7 +197,7 @@
                                                     <tbody>
                                                       @each((net, index) in snapshot.externalCalls)
                                                         <tr>
-                                                          <td><code>{{ net.type == 1 ? 'GET' : 'POST' }}</code></td>
+                                                          <td><code>{{ net.data.method }}</code></td>
                                                           <td><code>{{ net.data.url }}</code></td>
                                                         </tr>
                                                       @end
