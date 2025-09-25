@@ -73,6 +73,7 @@ export default class ArtifactsController {
 
 
             artifact.artifactUri = getWorkingUri(artifact.artifactUri);
+            artifact.metadataUri = getWorkingUri(artifact.metadataUri);
 
             if (artifact.mimeType == 'image/svg+xml') {
                 artifact.thumbnailUri = "/images/svg-placeholder.png";
@@ -107,7 +108,7 @@ export default class ArtifactsController {
                             .firstOrFail();
 
         artifact.artifactUri = getPlatformSpecificUri(artifact);
-
+        artifact.metadataUri = getWorkingUri(artifact.metadataUri);
 
         console.log('Platform specific URI: ' + artifact.artifactUri);
 

@@ -89,7 +89,9 @@ export default class ArtifactsDiscover extends BaseCommand {
 
       let query = getQuery();
 
-      const response = await makeGraphQLRequest(query);
+      const teia_teztok_endpoint = Env.get('TEIA_TEZTOK_ENDPOINT');
+
+      const response = await makeGraphQLRequest(query, teia_teztok_endpoint);
 
       if(response && response.data && response.data.data && response.data.data.tokens && response.data.data.tokens.length > 0) {
 
@@ -193,9 +195,7 @@ export default class ArtifactsDiscover extends BaseCommand {
 
 
 
-async function makeGraphQLRequest(query: string) {
-
-  const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
+async function makeGraphQLRequest(query: string, teztok_endpoint: string) {
 
   try {
     const response = await axios.post(teztok_endpoint, {
