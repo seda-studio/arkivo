@@ -30,5 +30,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=production-deps /app/node_modules /app/node_modules
 COPY --from=build /app/build /app
+RUN npx playwright@1.46.1 install --with-deps
+RUN npx playwright install
 EXPOSE 8080
 CMD ["node", "ace", "queue:listen", "--queue=snapshot"]

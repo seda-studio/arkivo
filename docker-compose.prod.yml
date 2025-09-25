@@ -123,6 +123,17 @@ services:
       - APP_PORT=${PORT}
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
+
+  certbot:
+    image: certbot/certbot
+    container_name: arkivo_certbot
+    volumes:
+      - ./ssl:/etc/letsencrypt  # Persist certificates
+      - ./webroot:/var/www/html # For challenge validation
+    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/html --quiet; sleep 12h & wait $${!}; done;'
+
+
+
 volumes:
   db_volume:
   redis_volume:

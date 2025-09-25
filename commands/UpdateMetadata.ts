@@ -60,11 +60,13 @@ export default class UpdateMetadata extends BaseCommand {
     Logger.info('Preparing to fetch artifact metadata from: ' + this.platform)
 
 
+    const teia_teztok_endpoint = Env.get('TEIA_TEZTOK_ENDPOINT');
+
     if (this.all) {
 
       while (true) {
 
-        const response = await makeGraphQLRequest(getGraphQLTeiaAllInteractives());
+        const response = await makeGraphQLRequest(getGraphQLTeiaAllInteractives(), teia_teztok_endpoint);
 
         if (response && response.data && response.data.data && response.data.data.tokens && response.data.data.tokens.length > 0) {
 
@@ -100,7 +102,7 @@ export default class UpdateMetadata extends BaseCommand {
 
       let query = getGraphQLTeiaByTokenId(this.tokenId);
 
-      const response = await makeGraphQLRequest(query);
+      const response = await makeGraphQLRequest(query, teia_teztok_endpoint);
 
       if (response && response.data && response.data.data && response.data.data.tokens && response.data.data.tokens.length > 0) {
 
@@ -169,6 +171,8 @@ export async function createOrUpdateArtifact(artifact: Artifact, token: any) {
 
 export async function createOrUpdateArtistProfile(address: string) {
 
+  const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
+
   Logger.info('Updating artist profile: ' + address)
 
   let artist = await Identity.query()
@@ -179,7 +183,7 @@ export async function createOrUpdateArtistProfile(address: string) {
       artist = new Identity();
     }
 
-  const response = await makeGraphQLRequest(getArtistProfileData(address));
+  const response = await makeGraphQLRequest(getArtistProfileData(address), teztok_endpoint);
 
   if (response && response.data && response.data.data && response.data.data.tzprofiles && response.data.data.tzprofiles.length > 0) {
 
@@ -202,9 +206,7 @@ export async function createOrUpdateArtistProfile(address: string) {
 }
 
 
-async function makeGraphQLRequest(query: string) {
-
-  const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
+async function makeGraphQLRequest(query: string, teztok_endpoint: string) {
 
   try {
     const response = await axios.post(teztok_endpoint, {
