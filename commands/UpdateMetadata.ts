@@ -164,11 +164,14 @@ export async function createOrUpdateArtifact(artifact: Artifact, token: any) {
     .sync(tags.map(tag => tag.id));
 
 
-  await createOrUpdateArtistProfile(artifact.artistAddress);
+  await createOrUpdateTeiaArtistProfile(artifact.artistAddress);
 
 }
 
 
+/*
+* TODO: this was deprecated in favor of teia profile only (due to main teztok indexer no longer active), remove if not needed
+*/
 export async function createOrUpdateArtistProfile(address: string) {
 
   const teztok_endpoint = Env.get('TEZTOK_ENDPOINT');
@@ -199,6 +202,34 @@ export async function createOrUpdateArtistProfile(address: string) {
     artist.logo = profile.logo;
     artist.twitter = profile.twitter;
     artist.website = profile.website;
+
+    await artist.save();
+    
+  }
+}
+
+export async function createOrUpdateTeiaArtistProfile(address: string) {
+
+  const teia_teztok_endpoint = Env.get('TEIA_TEZTOK_ENDPOINT');
+
+  Logger.info('Updating artist profile: ' + address)
+
+  let artist = await Identity.query()
+    .where('account', address)
+    .first();
+
+    if (!artist) {
+      artist = new Identity();
+    }
+
+  const response = await makeGraphQLRequest(getTeiaArtistProfileData(address), teia_teztok_endpoint);
+
+  if (response && response.data && response.data.data && response.data.data.tzprofiles && response.data.data.teia_users.length > 0) {
+
+    const profile = response.data.data.teia_users[0];
+
+    artist.account = profile.account;
+    artist.alias = profile.name;
 
     await artist.save();
     
@@ -296,5 +327,16 @@ function getArtistProfileData(address: string) {
               website
           }
       }
+  `
+};
+
+function getTeiaArtistProfileData(address: string) {
+
+  return `
+    query teiaArtistInfo($address: String = "${address}") {
+      teia_users(where: {user_address: {_eq: $address}}) {
+        name
+      }
+    }
   `
 };
